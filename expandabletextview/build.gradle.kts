@@ -1,5 +1,5 @@
 plugins {
-    id("com.android.application")
+    id("com.android.library")
     id("org.jetbrains.kotlin.android")
 }
 
@@ -7,14 +7,9 @@ android {
     compileSdk = 32
 
     defaultConfig {
-        applicationId = "la.me.leo.expandabletextview"
         minSdk = 23
         targetSdk = 32
-        versionCode = 1
-        versionName = "1.0"
-        multiDexEnabled = true
     }
-
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
@@ -25,7 +20,5 @@ android {
 }
 
 dependencies {
-    implementation("androidx.multidex:multidex:2.0.1")
     implementation("androidx.appcompat:appcompat:1.4.1")
-    implementation(project(":expandabletextview"))
 }

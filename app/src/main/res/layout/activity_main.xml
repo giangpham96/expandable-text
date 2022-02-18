@@ -3,11 +3,15 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".MainActivity">
 
-    <TextView
-        android:layout_width="wrap_content"
+    <la.me.leo.expandabletextview.ExpandableTextView
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Hello World!" />
+        android:padding="16dp"
+        android:ellipsize="end"
+        app:expandableText="@string/hebrew_text"
+        app:expandCta="Read more"/>
 
 </FrameLayout>
