@@ -4,8 +4,6 @@ import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
 import android.content.Context
-import android.graphics.Canvas
-import android.graphics.drawable.Drawable
 import android.os.Build
 import android.text.Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
 import android.text.SpannableString
@@ -14,7 +12,6 @@ import android.text.StaticLayout
 import android.text.TextUtils
 import android.text.style.ForegroundColorSpan
 import android.util.AttributeSet
-import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import androidx.annotation.ColorInt
 import androidx.appcompat.widget.AppCompatTextView
