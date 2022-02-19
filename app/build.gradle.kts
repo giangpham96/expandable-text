@@ -12,7 +12,6 @@ android {
         targetSdk = 32
         versionCode = 1
         versionName = "1.0"
-        multiDexEnabled = true
     }
 
     compileOptions {
@@ -22,10 +21,12 @@ android {
     kotlinOptions {
         jvmTarget = "11"
     }
+    buildFeatures {
+        viewBinding = true
+    }
 }
 
 dependencies {
-    implementation("androidx.multidex:multidex:2.0.1")
     implementation("androidx.appcompat:appcompat:1.4.1")
     implementation(project(":expandabletextview"))
 }
