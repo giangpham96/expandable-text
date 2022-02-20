@@ -5,11 +5,14 @@ import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
 import android.content.Context
 import android.os.Build
+import android.text.DynamicLayout
+import android.text.Layout.Alignment.ALIGN_NORMAL
 import android.text.Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
 import android.text.SpannableString
 import android.text.SpannableStringBuilder
 import android.text.StaticLayout
 import android.text.TextUtils
+import android.text.TextUtils.TruncateAt.END
 import android.text.style.ForegroundColorSpan
 import android.util.AttributeSet
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
@@ -84,6 +87,7 @@ class ExpandableTextView @JvmOverloads constructor(
     private var expandCtaStaticLayout: StaticLayout? = null
 
     init {
+        ellipsize = END
         val a = context.obtainStyledAttributes(attrs, R.styleable.ExpandableTextView)
         expandCta = a.getString(R.styleable.ExpandableTextView_expandCta) ?: expandCta
         expandCtaColor = a.getColor(R.styleable.ExpandableTextView_expandCtaColor, expandCtaColor)
@@ -179,9 +183,10 @@ class ExpandableTextView @JvmOverloads constructor(
             val totalTextWidthWithoutCta =
                 (0 until staticLayout.lineCount).sumOf { staticLayout.getLineWidth(it).toInt() }
             val totalTextWidthWithCta = totalTextWidthWithoutCta - expandCtaStaticLayout!!.getLineWidth(0)
-            val textWithoutCta = TextUtils.ellipsize(expandableText, paint, totalTextWidthWithCta, ellipsize)
-
+            val textWithoutCta = TextUtils.ellipsize(expandableText, paint, totalTextWidthWithCta, END)
             val defaultEllipsisStart = textWithoutCta.indexOf(Typography.ellipsis)
+            // in case the size only fits cta, shows cta only
+            if (textWithoutCta == "") return SpannableStringBuilder(expandCtaStaticLayout!!.text)
             // on some devices Typography.ellipsis can't be found,
             // in that case don't replace ellipsis sign with ellipsizedText
             // users are still able to expand ellipsized text
@@ -189,12 +194,36 @@ class ExpandableTextView @JvmOverloads constructor(
                 return truncatedTextWithoutCta
             }
             val defaultEllipsisEnd = defaultEllipsisStart + 1
-            return SpannableStringBuilder()
+            val span = SpannableStringBuilder()
                 .append(textWithoutCta)
                 .replace(defaultEllipsisStart, defaultEllipsisEnd, expandCtaStaticLayout!!.text)
+            return maybeRemoveEndingCharacters(span)
         } else {
             return expandableText
         }
+    }
+
+    // sanity check before applying the text. Most of the time, the loop doesn't happen
+    private fun maybeRemoveEndingCharacters(span: SpannableStringBuilder): SpannableStringBuilder {
+        val textWidth = collapsedStaticLayout!!.width
+        val dynamicLayout = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            DynamicLayout.Builder.obtain(span, paint, textWidth)
+                .setAlignment(ALIGN_NORMAL)
+                .setIncludePad(false)
+                .setLineSpacing(lineSpacingExtra, lineSpacingMultiplier)
+                .build()
+        } else {
+            @Suppress("DEPRECATION")
+            DynamicLayout(span, span, paint, textWidth, ALIGN_NORMAL, lineSpacingMultiplier, lineSpacingExtra, false)
+        }
+
+        val ctaIndex = span.indexOf(expandCtaStaticLayout!!.text.toString())
+        var removingCharIndex = ctaIndex - 1
+        while (removingCharIndex >= 0 && dynamicLayout.lineCount > collapsedMaxLines) {
+            span.delete(removingCharIndex, removingCharIndex + 1)
+            removingCharIndex--
+        }
+        return span
     }
 
     private fun updateLayout(collapsed: Boolean, expanded: Boolean, cta: Boolean, textWidth: Int) {
@@ -217,7 +246,7 @@ class ExpandableTextView @JvmOverloads constructor(
         return StaticLayout.Builder
             .obtain(text, 0, text.length, paint, maximumLineWidth)
             .setIncludePad(false)
-            .setEllipsize(ellipsize)
+            .setEllipsize(END)
             .setMaxLines(targetMaxLines)
             .setLineSpacing(lineSpacingExtra, lineSpacingMultiplier)
             .run {

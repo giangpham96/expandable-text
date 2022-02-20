@@ -26,7 +26,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@color/purple_100"
-            android:ellipsize="end"
             android:padding="16dp"
             app:expandCta="More"
             app:expandCtaColor="@color/blue_500"
@@ -46,7 +45,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@color/purple_100"
-            android:ellipsize="end"
             android:padding="16dp"
             app:expandCta="Read more"
             app:expandableText="@string/hebrew_text" />
@@ -65,7 +63,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@color/purple_100"
-            android:ellipsize="end"
             android:maxLines="5"
             android:padding="16dp"
             app:expandCta="Read more"
@@ -88,7 +85,6 @@
             android:drawableStart="@android:drawable/ic_menu_edit"
             android:drawableTop="@android:drawable/ic_menu_save"
             android:drawablePadding="16dp"
-            android:ellipsize="end"
             android:padding="16dp"
             app:collapsedMaxLines="2"
             app:expandCta="More"
@@ -110,7 +106,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@color/purple_100"
-            android:ellipsize="end"
             android:padding="16dp"
             app:expandCta="More"
             app:expandableText="@string/long_text" />
@@ -198,7 +193,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@color/purple_100"
-                android:ellipsize="end"
                 android:padding="16dp"
                 app:expandCta="More"
                 app:expandableText="@string/long_text" />
@@ -219,7 +213,6 @@
                 android:layout_weight="1"
                 android:layout_height="wrap_content"
                 android:background="@color/purple_100"
-                android:ellipsize="end"
                 android:padding="16dp"
                 app:expandCta="More"
                 app:expandableText="@string/long_text" />
@@ -241,7 +234,6 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 android:background="@color/purple_100"
-                android:ellipsize="end"
                 android:padding="16dp"
                 app:expandCta="More"
                 app:expandableText="@string/long_text" />
