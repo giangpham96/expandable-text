@@ -50,7 +50,12 @@ class ExpandableTextView @JvmOverloads constructor(
         }
     var collapsedMaxLines: Int = 3
         set(value) {
-            check(maxLines == -1 || value <= maxLines)
+            check(maxLines == -1 || value <= maxLines) {
+                """
+                    maxLines ($maxLines) must be greater than or equal to collapsedMaxLines ($value). 
+                    maxLines can be -1 if there is no upper limit for lineCount.
+                """.trimIndent()
+            }
             field = value
             val textWidth = measuredWidth - compoundPaddingRight - compoundPaddingLeft
             updateLayout(collapsed = true, expanded = false, cta = false, textWidth)
@@ -84,7 +89,12 @@ class ExpandableTextView @JvmOverloads constructor(
         expandCtaColor = a.getColor(R.styleable.ExpandableTextView_expandCtaColor, expandCtaColor)
         expandableText = a.getString(R.styleable.ExpandableTextView_expandableText) ?: expandableText
         collapsedMaxLines = a.getInt(R.styleable.ExpandableTextView_collapsedMaxLines, collapsedMaxLines)
-        check(maxLines == -1 || collapsedMaxLines <= maxLines)
+        check(maxLines == -1 || collapsedMaxLines <= maxLines) {
+            """
+                maxLines ($maxLines) must be greater than or equal to collapsedMaxLines ($collapsedMaxLines). 
+                maxLines can be -1 if there is no upper limit for lineCount.
+            """.trimIndent()
+        }
         a.recycle()
         setOnClickListener(null)
     }
@@ -103,6 +113,12 @@ class ExpandableTextView @JvmOverloads constructor(
     }
 
     override fun setMaxLines(maxLines: Int) {
+        check(maxLines == -1 || collapsedMaxLines <= maxLines) {
+            """
+                maxLines ($maxLines) must be greater than or equal to collapsedMaxLines ($collapsedMaxLines). 
+                maxLines can be -1 if there is no upper limit for lineCount.
+            """.trimIndent()
+        }
         super.setMaxLines(maxLines)
         val textWidth = measuredWidth - compoundPaddingRight - compoundPaddingLeft
         updateLayout(collapsed = false, expanded = true, cta = true, textWidth)
@@ -190,7 +206,7 @@ class ExpandableTextView @JvmOverloads constructor(
         if (cta)
             expandCtaStaticLayout = getStaticLayout(1, expandCtaSpannable, textWidth)
     }
-    
+
     private fun updateText(textWidth: Int) {
         if (textWidth <= 0) return
         text = resolveDisplayedText(if (collapsed) collapsedStaticLayout!! else expandedStaticLayout!!)
