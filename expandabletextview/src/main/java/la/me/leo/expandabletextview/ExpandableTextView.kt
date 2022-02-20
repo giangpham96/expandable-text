@@ -72,6 +72,7 @@ class ExpandableTextView @JvmOverloads constructor(
         }
 
     private var oldTextWidth = 0
+    private var oldGivenHeight = 0
     private var animator: Animator? = null
     private var expandCtaSpannable = SpannableString("")
     private var collapsed = true
@@ -93,19 +94,21 @@ class ExpandableTextView @JvmOverloads constructor(
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         val givenWidth = MeasureSpec.getSize(widthMeasureSpec)
+        val givenHeight = MeasureSpec.getSize(heightMeasureSpec)
         val textWidth = givenWidth - compoundPaddingRight - compoundPaddingLeft
-        if (textWidth == oldTextWidth) {
+        if ((textWidth == oldTextWidth && oldGivenHeight == givenHeight) || animator?.isRunning == true) {
             super.onMeasure(widthMeasureSpec, heightMeasureSpec)
             return
         }
         /**
-         * This is a weird behavior, for this to work, the first time when this view measures, super.onMeasure needs
+         * This is a weird behavior. To make it work, the first time when this view measures, super.onMeasure needs
          * to be called before setting layouts & texts. However, the next time when the width changes, super.onMeasure
          * needs to be called after setting layouts & texts. Otherwise, the size is not calculated correctly
          */
         val preMeasure = oldTextWidth == 0
         if (preMeasure) super.onMeasure(widthMeasureSpec, heightMeasureSpec)
         oldTextWidth = textWidth
+        oldGivenHeight = givenHeight
         updateLayout(collapsed = true, expanded = true, cta = true, textWidth)
         updateText()
         if (!preMeasure) super.onMeasure(widthMeasureSpec, heightMeasureSpec)
