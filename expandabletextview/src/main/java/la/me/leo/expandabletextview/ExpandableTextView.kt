@@ -30,7 +30,7 @@ class ExpandableTextView @JvmOverloads constructor(
             field = value
             val textWidth = measuredWidth - compoundPaddingRight - compoundPaddingLeft
             updateLayout(collapsed = true, expanded = true, cta = false, textWidth)
-            updateText()
+            updateText(textWidth)
         }
     var expandCta: String = ""
         set(value) {
@@ -46,7 +46,7 @@ class ExpandableTextView @JvmOverloads constructor(
             )
             val textWidth = measuredWidth - compoundPaddingRight - compoundPaddingLeft
             updateLayout(collapsed = false, expanded = false, cta = true, textWidth)
-            updateText()
+            updateText(textWidth)
         }
     var collapsedMaxLines: Int = 3
         set(value) {
@@ -55,7 +55,7 @@ class ExpandableTextView @JvmOverloads constructor(
             val textWidth = measuredWidth - compoundPaddingRight - compoundPaddingLeft
             updateLayout(collapsed = true, expanded = false, cta = false, textWidth)
             if (collapsed) {
-                updateText()
+                updateText(textWidth)
             }
         }
 
@@ -67,19 +67,16 @@ class ExpandableTextView @JvmOverloads constructor(
             val ellipsis = Typography.ellipsis
             val start = ellipsis.toString().length
             expandCtaSpannable.setSpan(colorSpan, start, expandCtaSpannable.length, SPAN_EXCLUSIVE_EXCLUSIVE)
-            if (!hasWidthForText) return
-            updateText()
+            updateText(measuredWidth - compoundPaddingRight - compoundPaddingLeft)
         }
 
     private var oldTextWidth = 0
-    private var oldGivenHeight = 0
     private var animator: Animator? = null
     private var expandCtaSpannable = SpannableString("")
     private var collapsed = true
     private var expandedStaticLayout: StaticLayout? = null
     private var collapsedStaticLayout: StaticLayout? = null
     private var expandCtaStaticLayout: StaticLayout? = null
-    private val hasWidthForText get() = measuredWidth - compoundPaddingLeft - compoundPaddingRight > 0
 
     init {
         val a = context.obtainStyledAttributes(attrs, R.styleable.ExpandableTextView)
@@ -94,31 +91,22 @@ class ExpandableTextView @JvmOverloads constructor(
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         val givenWidth = MeasureSpec.getSize(widthMeasureSpec)
-        val givenHeight = MeasureSpec.getSize(heightMeasureSpec)
         val textWidth = givenWidth - compoundPaddingRight - compoundPaddingLeft
-        if ((textWidth == oldTextWidth && oldGivenHeight == givenHeight) || animator?.isRunning == true) {
+        if (textWidth == oldTextWidth || animator?.isRunning == true) {
             super.onMeasure(widthMeasureSpec, heightMeasureSpec)
             return
         }
-        /**
-         * This is a weird behavior. To make it work, the first time when this view measures, super.onMeasure needs
-         * to be called before setting layouts & texts. However, the next time when the width changes, super.onMeasure
-         * needs to be called after setting layouts & texts. Otherwise, the size is not calculated correctly
-         */
-        val preMeasure = oldTextWidth == 0
-        if (preMeasure) super.onMeasure(widthMeasureSpec, heightMeasureSpec)
         oldTextWidth = textWidth
-        oldGivenHeight = givenHeight
         updateLayout(collapsed = true, expanded = true, cta = true, textWidth)
-        updateText()
-        if (!preMeasure) super.onMeasure(widthMeasureSpec, heightMeasureSpec)
+        updateText(textWidth)
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec)
     }
 
     override fun setMaxLines(maxLines: Int) {
         super.setMaxLines(maxLines)
         val textWidth = measuredWidth - compoundPaddingRight - compoundPaddingLeft
         updateLayout(collapsed = false, expanded = true, cta = true, textWidth)
-        if (!collapsed) updateText()
+        if (!collapsed) updateText(textWidth)
     }
 
     override fun setOnClickListener(l: OnClickListener?) {
@@ -158,7 +146,7 @@ class ExpandableTextView @JvmOverloads constructor(
 
                     override fun onAnimationEnd(animation: Animator?) {
                         super.onAnimationEnd(animation)
-                        updateText()
+                        updateText(measuredWidth - compoundPaddingRight - compoundPaddingLeft)
                         val params = layoutParams
                         layoutParams.height = WRAP_CONTENT
                         layoutParams = params
@@ -203,8 +191,8 @@ class ExpandableTextView @JvmOverloads constructor(
             expandCtaStaticLayout = getStaticLayout(1, expandCtaSpannable, textWidth)
     }
     
-    private fun updateText() {
-        if (!hasWidthForText) return
+    private fun updateText(textWidth: Int) {
+        if (textWidth <= 0) return
         text = resolveDisplayedText(if (collapsed) collapsedStaticLayout!! else expandedStaticLayout!!)
     }
 

@@ -7,7 +7,7 @@
     android:orientation="vertical"
     tools:context=".MainActivity">
 
-    <androidx.appcompat.widget.LinearLayoutCompat
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
@@ -100,7 +100,7 @@
             android:layout_height="wrap_content"
             android:background="@color/purple_500"
             android:padding="16dp"
-            android:text="Text changes at runtime"
+            android:text="Property changes at runtime"
             android:textColor="@android:color/white"
             android:textStyle="bold"
             tools:ignore="HardcodedText" />
@@ -179,6 +179,75 @@
             android:text="Change width"
             tools:ignore="HardcodedText" />
 
-    </androidx.appcompat.widget.LinearLayoutCompat>
+        <androidx.appcompat.widget.AppCompatTextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/purple_500"
+            android:padding="16dp"
+            android:text="Change size due to constraint changes"
+            android:textColor="@android:color/white"
+            android:textStyle="bold"
+            tools:ignore="HardcodedText" />
+
+        <FrameLayout
+            android:id="@+id/flDynamicSize"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <la.me.leo.expandabletextview.ExpandableTextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/purple_100"
+                android:ellipsize="end"
+                android:padding="16dp"
+                app:expandCta="More"
+                app:expandableText="@string/long_text" />
+
+        </FrameLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <View
+                android:id="@+id/v"
+                android:layout_width="0dp"
+                android:layout_height="0dp" />
+
+            <la.me.leo.expandabletextview.ExpandableTextView
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:background="@color/purple_100"
+                android:ellipsize="end"
+                android:padding="16dp"
+                app:expandCta="More"
+                app:expandableText="@string/long_text" />
+
+        </LinearLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/clDynamicConstraint"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <la.me.leo.expandabletextview.ExpandableTextView
+                android:id="@+id/tvDynamicConstraint"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:layout_constrainedWidth="true"
+                app:layout_constraintWidth_percent="0.5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                android:background="@color/purple_100"
+                android:ellipsize="end"
+                android:padding="16dp"
+                app:expandCta="More"
+                app:expandableText="@string/long_text" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </LinearLayout>
 
 </ScrollView>

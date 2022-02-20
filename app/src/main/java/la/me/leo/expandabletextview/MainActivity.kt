@@ -6,13 +6,17 @@ import android.view.LayoutInflater
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.content.res.AppCompatResources
+import androidx.constraintlayout.widget.ConstraintSet
 import la.me.leo.expandabletextview.databinding.ActivityMainBinding
+import java.util.Timer
+import java.util.TimerTask
 import kotlin.random.Random
 
 class MainActivity : AppCompatActivity() {
 
     private var _binding: ActivityMainBinding? = null
     private val binding get() = _binding!!
+    private val t = Timer()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -78,10 +82,27 @@ class MainActivity : AppCompatActivity() {
             val b = drawableSet.random()
             tvDynamic.setCompoundDrawablesRelativeWithIntrinsicBounds(s, t, e, b)
         }
+        t.schedule(object: TimerTask() {
+            override fun run() {
+                runOnUiThread {
+                    val layoutParams = flDynamicSize.layoutParams
+                    layoutParams.width = if (layoutParams.width == MATCH_PARENT) 800 else MATCH_PARENT
+                    flDynamicSize.layoutParams = layoutParams
+                    val layoutParams1 = v.layoutParams
+                    layoutParams1.width = if (layoutParams1.width == 0) 200 else 0
+                    v.layoutParams = layoutParams1
+                    val constraintSet = ConstraintSet()
+                    constraintSet.clone(clDynamicConstraint)
+                    constraintSet.constrainPercentWidth(R.id.tvDynamicConstraint, Random.nextDouble(0.5, 1.0).toFloat().coerceIn(0.5f, 1f))
+                    constraintSet.applyTo(clDynamicConstraint)
+                }
+            }
+        }, 2000L, 5000L)
     }
 
     override fun onDestroy() {
         _binding = null
+        t.cancel()
         super.onDestroy()
     }
 }

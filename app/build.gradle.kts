@@ -28,5 +28,6 @@ android {
 
 dependencies {
     implementation("androidx.appcompat:appcompat:1.4.1")
+    implementation("androidx.constraintlayout:constraintlayout:2.1.3")
     implementation(project(":expandabletextview"))
 }
