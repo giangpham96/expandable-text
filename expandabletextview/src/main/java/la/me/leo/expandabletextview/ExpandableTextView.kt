@@ -28,7 +28,8 @@ class ExpandableTextView @JvmOverloads constructor(
     var expandableText: String = ""
         set(value) {
             field = value
-            updateLayout(collapsed = true, expanded = true, cta = false)
+            val textWidth = measuredWidth - compoundPaddingRight - compoundPaddingLeft
+            updateLayout(collapsed = true, expanded = true, cta = false, textWidth)
             updateText()
         }
     var expandCta: String = ""
@@ -43,14 +44,16 @@ class ExpandableTextView @JvmOverloads constructor(
                 expandCtaSpannable.length,
                 SPAN_EXCLUSIVE_EXCLUSIVE
             )
-            updateLayout(collapsed = false, expanded = false, cta = true)
+            val textWidth = measuredWidth - compoundPaddingRight - compoundPaddingLeft
+            updateLayout(collapsed = false, expanded = false, cta = true, textWidth)
             updateText()
         }
     var collapsedMaxLines: Int = 3
         set(value) {
             check(maxLines == -1 || value <= maxLines)
             field = value
-            updateLayout(collapsed = true, expanded = false, cta = false)
+            val textWidth = measuredWidth - compoundPaddingRight - compoundPaddingLeft
+            updateLayout(collapsed = true, expanded = false, cta = false, textWidth)
             if (collapsed) {
                 updateText()
             }
@@ -89,12 +92,30 @@ class ExpandableTextView @JvmOverloads constructor(
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec)
-        val textWidth = measuredWidth - compoundPaddingRight - compoundPaddingLeft
-        if (textWidth == oldTextWidth) return
+        val givenWidth = MeasureSpec.getSize(widthMeasureSpec)
+        val textWidth = givenWidth - compoundPaddingRight - compoundPaddingLeft
+        if (textWidth == oldTextWidth) {
+            super.onMeasure(widthMeasureSpec, heightMeasureSpec)
+            return
+        }
+        /**
+         * This is a weird behavior, for this to work, the first time when this view measures, super.onMeasure needs
+         * to be called before setting layouts & texts. However, the next time when the width changes, super.onMeasure
+         * needs to be called after setting layouts & texts. Otherwise, the size is not calculated correctly
+         */
+        val preMeasure = oldTextWidth == 0
+        if (preMeasure) super.onMeasure(widthMeasureSpec, heightMeasureSpec)
         oldTextWidth = textWidth
-        updateLayout(collapsed = true, expanded = true, cta = true)
+        updateLayout(collapsed = true, expanded = true, cta = true, textWidth)
         updateText()
+        if (!preMeasure) super.onMeasure(widthMeasureSpec, heightMeasureSpec)
+    }
+
+    override fun setMaxLines(maxLines: Int) {
+        super.setMaxLines(maxLines)
+        val textWidth = measuredWidth - compoundPaddingRight - compoundPaddingLeft
+        updateLayout(collapsed = false, expanded = true, cta = true, textWidth)
+        if (!collapsed) updateText()
     }
 
     override fun setOnClickListener(l: OnClickListener?) {
@@ -169,14 +190,14 @@ class ExpandableTextView @JvmOverloads constructor(
         }
     }
 
-    private fun updateLayout(collapsed: Boolean, expanded: Boolean, cta: Boolean) {
-        if (!hasWidthForText) return
+    private fun updateLayout(collapsed: Boolean, expanded: Boolean, cta: Boolean, textWidth: Int) {
+        if (textWidth <= 0) return
         if (collapsed)
-            collapsedStaticLayout = getStaticLayout(collapsedMaxLines, expandableText)
+            collapsedStaticLayout = getStaticLayout(collapsedMaxLines, expandableText, textWidth)
         if (expanded)
-            expandedStaticLayout = getStaticLayout(maxLines, expandableText)
+            expandedStaticLayout = getStaticLayout(maxLines, expandableText, textWidth)
         if (cta)
-            expandCtaStaticLayout = getStaticLayout(1, expandCtaSpannable)
+            expandCtaStaticLayout = getStaticLayout(1, expandCtaSpannable, textWidth)
     }
     
     private fun updateText() {
@@ -184,8 +205,8 @@ class ExpandableTextView @JvmOverloads constructor(
         text = resolveDisplayedText(if (collapsed) collapsedStaticLayout!! else expandedStaticLayout!!)
     }
 
-    private fun getStaticLayout(targetMaxLines: Int, text: CharSequence): StaticLayout {
-        val maximumLineWidth = (measuredWidth - compoundPaddingLeft - compoundPaddingRight).coerceAtLeast(0)
+    private fun getStaticLayout(targetMaxLines: Int, text: CharSequence, textWidth: Int): StaticLayout {
+        val maximumLineWidth = textWidth.coerceAtLeast(0)
         return StaticLayout.Builder
             .obtain(text, 0, text.length, paint, maximumLineWidth)
             .setIncludePad(false)

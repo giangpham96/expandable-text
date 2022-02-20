@@ -24,7 +24,7 @@ class MainActivity : AppCompatActivity() {
     private fun setupViews() = with(binding) {
         btnWidth.setOnClickListener {
             val layoutParams = tvDynamic.layoutParams
-            layoutParams.width = if (layoutParams.width == MATCH_PARENT) 600 else MATCH_PARENT
+            layoutParams.width = if (layoutParams.width == MATCH_PARENT) 800 else MATCH_PARENT
             tvDynamic.layoutParams = layoutParams
         }
         btnPadding.setOnClickListener {
