@@ -141,6 +141,14 @@ class ExpandableTextView @JvmOverloads constructor(
         super.onDetachedFromWindow()
     }
 
+    override fun setEllipsize(where: TextUtils.TruncateAt?) {
+        /**
+         * Due to this issue https://stackoverflow.com/questions/63939222/constraintlayout-ellipsize-start-not-working,
+         * this view only supports TextUtils.TruncateAt.END
+         */
+        super.setEllipsize(END)
+    }
+
     fun toggle() {
         if (expandedStaticLayout?.height == collapsedStaticLayout?.height) return
         val staticLayout = if (collapsed) expandedStaticLayout else collapsedStaticLayout
