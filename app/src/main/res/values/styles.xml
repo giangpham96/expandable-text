@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <style name="Text_Body">
+        <item name="android:textSize">14sp</item>
+        <item name="android:letterSpacing">0.009</item>
+        <item name="android:lineHeight" tools:targetApi="p">20sp</item>
+        <item name="android:lineSpacingExtra">3sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+</resources>

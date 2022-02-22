@@ -78,10 +78,13 @@ class ExpandableTextView @JvmOverloads constructor(
             updateText(measuredWidth - compoundPaddingRight - compoundPaddingLeft)
         }
 
+    var collapsed = true
+        private set
+    val expanded get() = !collapsed
+
     private var oldTextWidth = 0
     private var animator: Animator? = null
     private var expandCtaSpannable = SpannableString("")
-    private var collapsed = true
     private var expandedStaticLayout: StaticLayout? = null
     private var collapsedStaticLayout: StaticLayout? = null
     private var expandCtaStaticLayout: StaticLayout? = null
@@ -100,7 +103,7 @@ class ExpandableTextView @JvmOverloads constructor(
             """.trimIndent()
         }
         a.recycle()
-        setOnClickListener(null)
+        setOnClickListener { toggle() }
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
@@ -129,13 +132,6 @@ class ExpandableTextView @JvmOverloads constructor(
         if (!collapsed) updateText(textWidth)
     }
 
-    override fun setOnClickListener(l: OnClickListener?) {
-        super.setOnClickListener {
-            toggle()
-            l?.onClick(it)
-        }
-    }
-
     override fun onDetachedFromWindow() {
         animator?.cancel()
         super.onDetachedFromWindow()
@@ -150,7 +146,10 @@ class ExpandableTextView @JvmOverloads constructor(
     }
 
     fun toggle() {
-        if (expandedStaticLayout?.height == collapsedStaticLayout?.height) return
+        if (expandedStaticLayout?.height == collapsedStaticLayout?.height) {
+            collapsed = !collapsed
+            return
+        }
         val staticLayout = if (collapsed) expandedStaticLayout else collapsedStaticLayout
         val height0 = height
         val height1 = staticLayout!!.height + compoundPaddingBottom + compoundPaddingTop
