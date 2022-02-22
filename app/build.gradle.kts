@@ -7,7 +7,7 @@ android {
     compileSdk = 32
 
     defaultConfig {
-        applicationId = "la.me.leo.expandabletextview"
+        applicationId = "io.github.giangpham96.expandabletextview"
         minSdk = 23
         targetSdk = 32
         versionCode = 1

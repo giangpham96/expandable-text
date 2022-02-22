@@ -34,7 +34,7 @@ TBD
 ### Example XML
 
 ```xml
-        <la.me.leo.expandabletextview.ExpandableTextView
+        <io.github.giangpham96.expandabletextview.ExpandableTextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@color/purple_100"
