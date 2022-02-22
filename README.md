@@ -13,12 +13,12 @@ When user taps the text, it expands to show the full content. ExpandableTextView
 
 | Normal               | RTL                   | With drawable         |
 | :------------------: | :-------------------: | :-------------------: |
-| ![](arts/normal.mp4) | ![](arts/rtl.mp4)     | ![](arts/drawable.mp4)|
+| <video src="https://github.com/giangpham96/ExpandableTextView/blob/main/arts/normal.mp4" height="500"> | <video src="https://github.com/giangpham96/ExpandableTextView/blob/main/arts/rtl.mp4" height="500"> | <video src="https://github.com/giangpham96/ExpandableTextView/blob/main/arts/drawable.mp4" height="500"> |
 
 
 | maxLines when expand  | Property changes at runtime | Width changes at runtime         |
 | :-------------------: | :-------------------------: | :------------------------------: |
-| ![](arts/maxLines.mp4)| ![](arts/properties.mp4)    | ![](arts/width.mp4)              |
+| <video src="https://github.com/giangpham96/ExpandableTextView/blob/main/arts/maxLines.mp4" height="500"> | <video src="https://github.com/giangpham96/ExpandableTextView/blob/main/arts/properties.mp4" height="500"> | <video src="https://github.com/giangpham96/ExpandableTextView/blob/main/arts/width.mp4" height="500"> |
 
 ## Install
 TBD
