@@ -22,7 +22,7 @@
             android:textStyle="bold"
             tools:ignore="HardcodedText" />
 
-        <la.me.leo.expandabletextview.ExpandableTextView
+        <io.github.giangpham96.expandabletextview.ExpandableTextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@color/purple_100"
@@ -41,7 +41,7 @@
             android:textStyle="bold"
             tools:ignore="HardcodedText" />
 
-        <la.me.leo.expandabletextview.ExpandableTextView
+        <io.github.giangpham96.expandabletextview.ExpandableTextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@color/purple_100"
@@ -59,7 +59,7 @@
             android:textStyle="bold"
             tools:ignore="HardcodedText" />
 
-        <la.me.leo.expandabletextview.ExpandableTextView
+        <io.github.giangpham96.expandabletextview.ExpandableTextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@color/purple_100"
@@ -78,7 +78,7 @@
             android:textStyle="bold"
             tools:ignore="HardcodedText" />
 
-        <la.me.leo.expandabletextview.ExpandableTextView
+        <io.github.giangpham96.expandabletextview.ExpandableTextView
             style="@style/Text_Body"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -102,7 +102,7 @@
             android:textStyle="bold"
             tools:ignore="HardcodedText" />
 
-        <la.me.leo.expandabletextview.ExpandableTextView
+        <io.github.giangpham96.expandabletextview.ExpandableTextView
             android:id="@+id/tvDynamic"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -190,7 +190,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-            <la.me.leo.expandabletextview.ExpandableTextView
+            <io.github.giangpham96.expandabletextview.ExpandableTextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@color/purple_100"
@@ -209,7 +209,7 @@
                 android:layout_width="0dp"
                 android:layout_height="0dp" />
 
-            <la.me.leo.expandabletextview.ExpandableTextView
+            <io.github.giangpham96.expandabletextview.ExpandableTextView
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 android:layout_height="wrap_content"
@@ -225,7 +225,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-            <la.me.leo.expandabletextview.ExpandableTextView
+            <io.github.giangpham96.expandabletextview.ExpandableTextView
                 android:id="@+id/tvDynamicConstraint"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
