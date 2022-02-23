@@ -1,0 +1,4 @@
+-keepattributes Signature
+-keepattributes Exceptions
+-keepattributes InnerClasses
+-keepattributes *Annotation*
