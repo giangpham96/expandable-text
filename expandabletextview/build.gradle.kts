@@ -1,6 +1,7 @@
 plugins {
     id("com.android.library")
     id("org.jetbrains.kotlin.android")
+    `maven-publish`
 }
 
 android {
@@ -22,6 +23,20 @@ android {
     }
     kotlinOptions {
         jvmTarget = "11"
+    }
+}
+
+afterEvaluate {
+    publishing {
+        publications {
+            create<MavenPublication>("release") {
+                groupId = "io.github.giangpham96"
+                artifactId = "expandabletextview"
+                version = "1.0.0"
+
+                from(components.getByName("release"))
+            }
+        }
     }
 }
 
