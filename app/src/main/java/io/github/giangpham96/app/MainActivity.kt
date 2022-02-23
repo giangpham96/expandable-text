@@ -1,4 +1,4 @@
-package io.github.giangpham96.expandabletextview
+package io.github.giangpham96.app
 
 import android.graphics.Color
 import android.os.Bundle
@@ -7,7 +7,7 @@ import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.constraintlayout.widget.ConstraintSet
-import io.github.giangpham96.expandabletextview.databinding.ActivityMainBinding
+import io.github.giangpham96.app.databinding.ActivityMainBinding
 import java.util.Timer
 import java.util.TimerTask
 import kotlin.random.Random
