@@ -15,16 +15,9 @@ When user taps the text, it expands to show the full content. ExpandableTextView
 | :------------------: | :-------------------: | :-------------------: |
 | <video src="https://user-images.githubusercontent.com/23420470/155230035-81fe3b4b-47a9-4e1a-9215-9739a9c343c9.mp4" height=500> | <video src="https://user-images.githubusercontent.com/23420470/155230365-1b1d0acf-3a0a-4082-b966-ba08becbbbab.mp4" height=500> | <video src="https://user-images.githubusercontent.com/23420470/155230017-87b7be5f-0e32-4d6f-a496-b9b5bb559b3a.mp4" height=500> |
 
-
 | maxLines when expand  | Width changes at runtime         |
 | :-------------------: | :------------------------------: |
 | <video src="https://user-images.githubusercontent.com/23420470/155230032-991aa221-5828-478b-bda1-05cd1d4ac55b.mp4" height=500> | <video src="https://user-images.githubusercontent.com/23420470/155230372-08afae10-f07d-48fc-b4ce-cd7cbb179f9e.mp4" height=500> |
-        
-        
-
-
-
-
 
 ## Install
 TBD
@@ -34,16 +27,16 @@ TBD
 ### Example XML
 
 ```xml
-        <io.github.giangpham96.expandabletextview.ExpandableTextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@color/purple_100"
-            android:padding="16dp"
-            android:maxLines="10"
-            app:expandCta="More"
-            app:collapsedMaxLines="2"
-            app:expandCtaColor="@color/blue_500"
-            app:expandableText="@string/long_text" />
+    <io.github.giangpham96.expandabletextview.ExpandableTextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/purple_100"
+        android:padding="16dp"
+        android:maxLines="10"
+        app:expandCta="More"
+        app:collapsedMaxLines="2"
+        app:expandCtaColor="@color/blue_500"
+        app:expandableText="@string/long_text" />
 ```
 
 ### Attributes

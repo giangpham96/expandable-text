@@ -9,6 +9,12 @@ android {
     defaultConfig {
         minSdk = 23
         targetSdk = 32
+        consumerProguardFiles("consumer-proguard-rules.pro")
+    }
+    buildTypes {
+        release {
+            isMinifyEnabled = false
+        }
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11

@@ -7,11 +7,17 @@ android {
     compileSdk = 32
 
     defaultConfig {
-        applicationId = "io.github.giangpham96.expandabletextview"
+        applicationId = "io.github.giangpham96"
         minSdk = 23
         targetSdk = 32
         versionCode = 1
         versionName = "1.0"
+    }
+    buildTypes {
+        release {
+            isMinifyEnabled = true
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+        }
     }
 
     compileOptions {
