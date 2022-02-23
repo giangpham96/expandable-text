@@ -1,4 +1,4 @@
-# ExpandableTextView
+# ExpandableTextView [![](https://jitpack.io/v/giangpham96/ExpandableTextView.svg)](https://jitpack.io/#giangpham96/ExpandableTextView)
 
 Light-weighted, convenient implementation of expandable text view that supports expanding & collapsing animations for
 Android projects.
@@ -20,7 +20,37 @@ When user taps the text, it expands to show the full content. ExpandableTextView
 | <video src="https://user-images.githubusercontent.com/23420470/155230032-991aa221-5828-478b-bda1-05cd1d4ac55b.mp4" height=500> | <video src="https://user-images.githubusercontent.com/23420470/155230372-08afae10-f07d-48fc-b4ce-cd7cbb179f9e.mp4" height=500> |
 
 ## Install
-TBD
+**Step 1.** Add the JitPack repository to your build file
+- AGP older than 7.1.0
+```groovy
+// build.gradle (root level)
+allprojects {
+    repositories {
+        ...
+        maven { url 'https://jitpack.io' }
+    }
+}
+```
+
+- AGP 7.1.0 and newer
+```groovy
+// settings.gradle
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+			...
+			maven { url 'https://jitpack.io' }
+    }
+}
+```
+
+**Step 2.** Add the dependency
+```groovy
+// build.gradle (module level)
+dependencies {
+    implementation 'com.github.giangpham96:ExpandableTextView:1.0.0'
+}
+```
 
 ## Usage
 
