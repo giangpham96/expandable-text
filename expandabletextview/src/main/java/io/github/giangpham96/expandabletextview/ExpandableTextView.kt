@@ -15,6 +15,8 @@ import android.text.TextUtils
 import android.text.TextUtils.TruncateAt.END
 import android.text.style.ForegroundColorSpan
 import android.util.AttributeSet
+import android.view.View.MeasureSpec.EXACTLY
+import android.view.View.MeasureSpec.UNSPECIFIED
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import androidx.annotation.ColorInt
 import androidx.appcompat.widget.AppCompatTextView
@@ -31,9 +33,7 @@ class ExpandableTextView @JvmOverloads constructor(
     var expandableText: String = ""
         set(value) {
             field = value
-            val textWidth = measuredWidth - compoundPaddingRight - compoundPaddingLeft
-            updateLayout(collapsed = true, expanded = true, cta = false, textWidth)
-            updateText(textWidth)
+            updateCollapsedDisplayedText(ctaChanged = false)
         }
     var expandCta: String = ""
         set(value) {
@@ -47,9 +47,7 @@ class ExpandableTextView @JvmOverloads constructor(
                 expandCtaSpannable.length,
                 SPAN_EXCLUSIVE_EXCLUSIVE
             )
-            val textWidth = measuredWidth - compoundPaddingRight - compoundPaddingLeft
-            updateLayout(collapsed = false, expanded = false, cta = true, textWidth)
-            updateText(textWidth)
+            updateCollapsedDisplayedText(ctaChanged = true)
         }
     var collapsedMaxLines: Int = 3
         set(value) {
@@ -60,11 +58,7 @@ class ExpandableTextView @JvmOverloads constructor(
                 """.trimIndent()
             }
             field = value
-            val textWidth = measuredWidth - compoundPaddingRight - compoundPaddingLeft
-            updateLayout(collapsed = true, expanded = false, cta = false, textWidth)
-            if (collapsed) {
-                updateText(textWidth)
-            }
+            updateCollapsedDisplayedText(ctaChanged = false)
         }
 
     @ColorInt
@@ -75,7 +69,7 @@ class ExpandableTextView @JvmOverloads constructor(
             val ellipsis = Typography.ellipsis
             val start = ellipsis.toString().length
             expandCtaSpannable.setSpan(colorSpan, start, expandCtaSpannable.length, SPAN_EXCLUSIVE_EXCLUSIVE)
-            updateText(measuredWidth - compoundPaddingRight - compoundPaddingLeft)
+            updateCollapsedDisplayedText(ctaChanged = true)
         }
 
     var collapsed = true
@@ -85,9 +79,8 @@ class ExpandableTextView @JvmOverloads constructor(
     private var oldTextWidth = 0
     private var animator: Animator? = null
     private var expandCtaSpannable = SpannableString("")
-    private var expandedStaticLayout: StaticLayout? = null
-    private var collapsedStaticLayout: StaticLayout? = null
     private var expandCtaStaticLayout: StaticLayout? = null
+    private var collapsedDisplayedText: CharSequence? = null
 
     init {
         ellipsize = END
@@ -108,14 +101,13 @@ class ExpandableTextView @JvmOverloads constructor(
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         val givenWidth = MeasureSpec.getSize(widthMeasureSpec)
-        val textWidth = givenWidth - compoundPaddingRight - compoundPaddingLeft
+        val textWidth = givenWidth - compoundPaddingStart - compoundPaddingEnd
         if (textWidth == oldTextWidth || animator?.isRunning == true) {
             super.onMeasure(widthMeasureSpec, heightMeasureSpec)
             return
         }
         oldTextWidth = textWidth
-        updateLayout(collapsed = true, expanded = true, cta = true, textWidth)
-        updateText(textWidth)
+        updateCollapsedDisplayedText(ctaChanged = true, textWidth)
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
     }
 
@@ -127,9 +119,7 @@ class ExpandableTextView @JvmOverloads constructor(
             """.trimIndent()
         }
         super.setMaxLines(maxLines)
-        val textWidth = measuredWidth - compoundPaddingRight - compoundPaddingLeft
-        updateLayout(collapsed = false, expanded = true, cta = true, textWidth)
-        if (!collapsed) updateText(textWidth)
+        updateCollapsedDisplayedText(ctaChanged = false)
     }
 
     override fun onDetachedFromWindow() {
@@ -146,13 +136,14 @@ class ExpandableTextView @JvmOverloads constructor(
     }
 
     fun toggle() {
-        if (expandedStaticLayout?.height == collapsedStaticLayout?.height) {
+        if (expandableText == collapsedDisplayedText) {
             collapsed = !collapsed
             return
         }
-        val staticLayout = if (collapsed) expandedStaticLayout else collapsedStaticLayout
         val height0 = height
-        val height1 = staticLayout!!.height + compoundPaddingBottom + compoundPaddingTop
+        text = if (collapsed) expandableText else collapsedDisplayedText
+        measure(MeasureSpec.makeMeasureSpec(width, EXACTLY), MeasureSpec.makeMeasureSpec(height, UNSPECIFIED))
+        val height1 = measuredHeight
         animator?.cancel()
         val dur = (abs(height1 - height0) * 2L).coerceAtMost(300L)
         animator = ValueAnimator.ofInt(height0, height1)
@@ -173,7 +164,7 @@ class ExpandableTextView @JvmOverloads constructor(
 
                     override fun onAnimationEnd(animation: Animator?) {
                         super.onAnimationEnd(animation)
-                        updateText(measuredWidth - compoundPaddingRight - compoundPaddingLeft)
+                        text = if (collapsed) collapsedDisplayedText else expandableText
                         val params = layoutParams
                         layoutParams.height = WRAP_CONTENT
                         layoutParams = params
@@ -186,14 +177,13 @@ class ExpandableTextView @JvmOverloads constructor(
     private fun resolveDisplayedText(staticLayout: StaticLayout): CharSequence? {
         val truncatedTextWithoutCta = staticLayout.text
         if (truncatedTextWithoutCta.toString() != expandableText) {
-            if (!collapsed) return truncatedTextWithoutCta
             val totalTextWidthWithoutCta =
                 (0 until staticLayout.lineCount).sumOf { staticLayout.getLineWidth(it).toInt() }
             val totalTextWidthWithCta = totalTextWidthWithoutCta - expandCtaStaticLayout!!.getLineWidth(0)
             val textWithoutCta = TextUtils.ellipsize(expandableText, paint, totalTextWidthWithCta, END)
             val defaultEllipsisStart = textWithoutCta.indexOf(Typography.ellipsis)
             // in case the size only fits cta, shows cta only
-            if (textWithoutCta == "") return SpannableStringBuilder(expandCtaStaticLayout!!.text)
+            if (textWithoutCta == "") return expandCtaStaticLayout!!.text
             // on some devices Typography.ellipsis can't be found,
             // in that case don't replace ellipsis sign with ellipsizedText
             // users are still able to expand ellipsized text
@@ -204,15 +194,18 @@ class ExpandableTextView @JvmOverloads constructor(
             val span = SpannableStringBuilder()
                 .append(textWithoutCta)
                 .replace(defaultEllipsisStart, defaultEllipsisEnd, expandCtaStaticLayout!!.text)
-            return maybeRemoveEndingCharacters(span)
+            return maybeRemoveEndingCharacters(staticLayout, span)
         } else {
             return expandableText
         }
     }
 
     // sanity check before applying the text. Most of the time, the loop doesn't happen
-    private fun maybeRemoveEndingCharacters(span: SpannableStringBuilder): SpannableStringBuilder {
-        val textWidth = collapsedStaticLayout!!.width
+    private fun maybeRemoveEndingCharacters(
+        staticLayout: StaticLayout,
+        span: SpannableStringBuilder,
+    ): SpannableStringBuilder {
+        val textWidth = staticLayout.width
         val dynamicLayout = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             DynamicLayout.Builder.obtain(span, paint, textWidth)
                 .setAlignment(ALIGN_NORMAL)
@@ -233,19 +226,16 @@ class ExpandableTextView @JvmOverloads constructor(
         return span
     }
 
-    private fun updateLayout(collapsed: Boolean, expanded: Boolean, cta: Boolean, textWidth: Int) {
+    private fun updateCollapsedDisplayedText(
+        ctaChanged: Boolean,
+        textWidth: Int = measuredWidth - compoundPaddingStart - compoundPaddingEnd,
+    ) {
         if (textWidth <= 0) return
-        if (collapsed)
-            collapsedStaticLayout = getStaticLayout(collapsedMaxLines, expandableText, textWidth)
-        if (expanded)
-            expandedStaticLayout = getStaticLayout(maxLines, expandableText, textWidth)
-        if (cta)
+        val collapsedStaticLayout = getStaticLayout(collapsedMaxLines, expandableText, textWidth)
+        if (ctaChanged)
             expandCtaStaticLayout = getStaticLayout(1, expandCtaSpannable, textWidth)
-    }
-
-    private fun updateText(textWidth: Int) {
-        if (textWidth <= 0) return
-        text = resolveDisplayedText(if (collapsed) collapsedStaticLayout!! else expandedStaticLayout!!)
+        collapsedDisplayedText = resolveDisplayedText(collapsedStaticLayout)
+        text = if (collapsed) collapsedDisplayedText else expandableText
     }
 
     private fun getStaticLayout(targetMaxLines: Int, text: CharSequence, textWidth: Int): StaticLayout {
@@ -256,13 +246,6 @@ class ExpandableTextView @JvmOverloads constructor(
             .setEllipsize(END)
             .setMaxLines(targetMaxLines)
             .setLineSpacing(lineSpacingExtra, lineSpacingMultiplier)
-            .run {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                    setUseLineSpacingFromFallbacks(true)
-                } else {
-                    this
-                }
-            }
             .build()
     }
 
