@@ -1,10 +1,10 @@
 <resources>
 
     <declare-styleable name="ExpandableTextView">
-        <attr name="collapsedMaxLines" format="integer" />
-        <attr name="expandableText" format="string" />
-        <attr name="expandCta" format="string" />
-        <attr name="expandCtaColor" format="string" />
+        <attr name="limitedMaxLines" format="integer" />
+        <attr name="originalText" format="string" />
+        <attr name="expandAction" format="string" />
+        <attr name="expandActionColor" format="string" />
     </declare-styleable>
 
 </resources>

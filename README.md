@@ -63,27 +63,27 @@ dependencies {
         android:background="@color/purple_100"
         android:padding="16dp"
         android:maxLines="10"
-        app:expandCta="More"
-        app:collapsedMaxLines="2"
-        app:expandCtaColor="@color/blue_500"
-        app:expandableText="@string/long_text" />
+        app:expandAction="More"
+        app:limitedMaxLines="2"
+        app:expandActionColor="@color/blue_500"
+        app:originalText="@string/long_text" />
 ```
 
 ### Attributes
 
 | Attributes            | Type                 | Description                 | Default value                    |
 | :-------------------: | :-------------------------: | :-------------------------: | :------------------------------: |
-| app:collapsedMaxLines | Int | The maximum line counts when the text is collapsed | 3 |
-| app:expandCta | String | The Cta at the end of truncated text such as "View more" | "" (Nothing will be shown at the end of truncated text)|
-| app:expandCtaColor | Color | The color of expand Cta | #ffaa66cc |
-| app:expandableText | String | The text to be displayed on this text view | "" |
+| app:limitedMaxLines | Int | The maximum line counts when the text is collapsed | 3 |
+| app:expandAction | String | The action at the end of truncated text such as "View more" | "" (Nothing will be shown at the end of truncated text)|
+| app:expandActionColor | Color | The color of expand action | #ffaa66cc |
+| app:originalText | String | The text to be displayed on this text view | "" |
 
 ### Public functions
 
-- `collapsedMaxLines` public getter & setter for the maximum line counts when the text is collapsed.
-- `expandCta` public getter & setter for the Cta at the end of truncated text such as "View more".
-- `expandCtaColor` public getter & setter for the color of expand Cta.
-- `expandableText` public getter & setter for the text to be displayed on this text view.
+- `limitedMaxLines` public getter & setter for the maximum line counts when the text is collapsed.
+- `expandAction` public getter & setter for the action at the end of truncated text such as "View more".
+- `expandActionColor` public getter & setter for the color of expand action.
+- `originalText` public getter & setter for the text to be displayed on this text view.
 - `collapsed` public getter to determine if the text is being collapsed
 - `expanded` public getter to determine if the text is being expanded
 - `toggle` function that makes the text changes its state from collapsed to expanded & vice versa. It also adds
@@ -91,8 +91,8 @@ animation transition during the state change.
 
 ### Notes
 
-- **DO NOT** directly use `android:text` or `setText` in this view. Use `app:expandableText` or `expandableText` instead.
+- **DO NOT** directly use `android:text` or `setText` in this view. Use `app:originalText` or `originalText` instead.
 Attempting to use `android:text` or `setText` will lead to unexpected behaviour.
-- At any time, `collapsedMaxLines` **MUST** always be less than or equal to `maxLines`. Otherwise, an exception will be
+- At any time, `limitedMaxLines` **MUST** always be less than or equal to `maxLines`. Otherwise, an exception will be
 thrown.
 - This view only supports `TextUtils.TruncateAt.END`.

@@ -30,30 +30,30 @@ class ExpandableTextView @JvmOverloads constructor(
     defStyleAttr: Int = 0,
 ) : AppCompatTextView(context, attrs, defStyleAttr) {
 
-    var expandableText: String = ""
+    var originalText: String = ""
         set(value) {
             field = value
             updateCollapsedDisplayedText(ctaChanged = false)
         }
-    var expandCta: String = ""
+    var expandAction: String = ""
         set(value) {
             field = value
             val ellipsis = Typography.ellipsis
             val start = ellipsis.toString().length
-            expandCtaSpannable = SpannableString("$ellipsis $value")
-            expandCtaSpannable.setSpan(
-                ForegroundColorSpan(expandCtaColor),
+            expandActionSpannable = SpannableString("$ellipsis $value")
+            expandActionSpannable.setSpan(
+                ForegroundColorSpan(expandActionColor),
                 start,
-                expandCtaSpannable.length,
+                expandActionSpannable.length,
                 SPAN_EXCLUSIVE_EXCLUSIVE
             )
             updateCollapsedDisplayedText(ctaChanged = true)
         }
-    var collapsedMaxLines: Int = 3
+    var limitedMaxLines: Int = 3
         set(value) {
             check(maxLines == -1 || value <= maxLines) {
                 """
-                    maxLines ($maxLines) must be greater than or equal to collapsedMaxLines ($value). 
+                    maxLines ($maxLines) must be greater than or equal to limitedMaxLines ($value). 
                     maxLines can be -1 if there is no upper limit for lineCount.
                 """.trimIndent()
             }
@@ -62,13 +62,13 @@ class ExpandableTextView @JvmOverloads constructor(
         }
 
     @ColorInt
-    var expandCtaColor: Int = ContextCompat.getColor(context, android.R.color.holo_purple)
+    var expandActionColor: Int = ContextCompat.getColor(context, android.R.color.holo_purple)
         set(value) {
             field = value
             val colorSpan = ForegroundColorSpan(value)
             val ellipsis = Typography.ellipsis
             val start = ellipsis.toString().length
-            expandCtaSpannable.setSpan(colorSpan, start, expandCtaSpannable.length, SPAN_EXCLUSIVE_EXCLUSIVE)
+            expandActionSpannable.setSpan(colorSpan, start, expandActionSpannable.length, SPAN_EXCLUSIVE_EXCLUSIVE)
             updateCollapsedDisplayedText(ctaChanged = true)
         }
 
@@ -78,20 +78,20 @@ class ExpandableTextView @JvmOverloads constructor(
 
     private var oldTextWidth = 0
     private var animator: Animator? = null
-    private var expandCtaSpannable = SpannableString("")
-    private var expandCtaStaticLayout: StaticLayout? = null
+    private var expandActionSpannable = SpannableString("")
+    private var expandActionStaticLayout: StaticLayout? = null
     private var collapsedDisplayedText: CharSequence? = null
 
     init {
         ellipsize = END
         val a = context.obtainStyledAttributes(attrs, R.styleable.ExpandableTextView)
-        expandCta = a.getString(R.styleable.ExpandableTextView_expandCta) ?: expandCta
-        expandCtaColor = a.getColor(R.styleable.ExpandableTextView_expandCtaColor, expandCtaColor)
-        expandableText = a.getString(R.styleable.ExpandableTextView_expandableText) ?: expandableText
-        collapsedMaxLines = a.getInt(R.styleable.ExpandableTextView_collapsedMaxLines, collapsedMaxLines)
-        check(maxLines == -1 || collapsedMaxLines <= maxLines) {
+        expandAction = a.getString(R.styleable.ExpandableTextView_expandAction) ?: expandAction
+        expandActionColor = a.getColor(R.styleable.ExpandableTextView_expandActionColor, expandActionColor)
+        originalText = a.getString(R.styleable.ExpandableTextView_originalText) ?: originalText
+        limitedMaxLines = a.getInt(R.styleable.ExpandableTextView_limitedMaxLines, limitedMaxLines)
+        check(maxLines == -1 || limitedMaxLines <= maxLines) {
             """
-                maxLines ($maxLines) must be greater than or equal to collapsedMaxLines ($collapsedMaxLines). 
+                maxLines ($maxLines) must be greater than or equal to limitedMaxLines ($limitedMaxLines). 
                 maxLines can be -1 if there is no upper limit for lineCount.
             """.trimIndent()
         }
@@ -112,9 +112,9 @@ class ExpandableTextView @JvmOverloads constructor(
     }
 
     override fun setMaxLines(maxLines: Int) {
-        check(maxLines == -1 || collapsedMaxLines <= maxLines) {
+        check(maxLines == -1 || limitedMaxLines <= maxLines) {
             """
-                maxLines ($maxLines) must be greater than or equal to collapsedMaxLines ($collapsedMaxLines). 
+                maxLines ($maxLines) must be greater than or equal to limitedMaxLines ($limitedMaxLines). 
                 maxLines can be -1 if there is no upper limit for lineCount.
             """.trimIndent()
         }
@@ -136,12 +136,12 @@ class ExpandableTextView @JvmOverloads constructor(
     }
 
     fun toggle() {
-        if (expandableText == collapsedDisplayedText) {
+        if (originalText == collapsedDisplayedText) {
             collapsed = !collapsed
             return
         }
         val height0 = height
-        text = if (collapsed) expandableText else collapsedDisplayedText
+        text = if (collapsed) originalText else collapsedDisplayedText
         measure(MeasureSpec.makeMeasureSpec(width, EXACTLY), MeasureSpec.makeMeasureSpec(height, UNSPECIFIED))
         val height1 = measuredHeight
         animator?.cancel()
@@ -159,12 +159,12 @@ class ExpandableTextView @JvmOverloads constructor(
                     override fun onAnimationStart(animation: Animator?) {
                         super.onAnimationStart(animation)
                         collapsed = !collapsed
-                        text = expandableText
+                        text = originalText
                     }
 
                     override fun onAnimationEnd(animation: Animator?) {
                         super.onAnimationEnd(animation)
-                        text = if (collapsed) collapsedDisplayedText else expandableText
+                        text = if (collapsed) collapsedDisplayedText else originalText
                         val params = layoutParams
                         layoutParams.height = WRAP_CONTENT
                         layoutParams = params
@@ -176,14 +176,14 @@ class ExpandableTextView @JvmOverloads constructor(
 
     private fun resolveDisplayedText(staticLayout: StaticLayout): CharSequence? {
         val truncatedTextWithoutCta = staticLayout.text
-        if (truncatedTextWithoutCta.toString() != expandableText) {
+        if (truncatedTextWithoutCta.toString() != originalText) {
             val totalTextWidthWithoutCta =
                 (0 until staticLayout.lineCount).sumOf { staticLayout.getLineWidth(it).toInt() }
-            val totalTextWidthWithCta = totalTextWidthWithoutCta - expandCtaStaticLayout!!.getLineWidth(0)
-            val textWithoutCta = TextUtils.ellipsize(expandableText, paint, totalTextWidthWithCta, END)
+            val totalTextWidthWithCta = totalTextWidthWithoutCta - expandActionStaticLayout!!.getLineWidth(0)
+            val textWithoutCta = TextUtils.ellipsize(originalText, paint, totalTextWidthWithCta, END)
             val defaultEllipsisStart = textWithoutCta.indexOf(Typography.ellipsis)
             // in case the size only fits cta, shows cta only
-            if (textWithoutCta == "") return expandCtaStaticLayout!!.text
+            if (textWithoutCta == "") return expandActionStaticLayout!!.text
             // on some devices Typography.ellipsis can't be found,
             // in that case don't replace ellipsis sign with ellipsizedText
             // users are still able to expand ellipsized text
@@ -193,10 +193,10 @@ class ExpandableTextView @JvmOverloads constructor(
             val defaultEllipsisEnd = defaultEllipsisStart + 1
             val span = SpannableStringBuilder()
                 .append(textWithoutCta)
-                .replace(defaultEllipsisStart, defaultEllipsisEnd, expandCtaStaticLayout!!.text)
+                .replace(defaultEllipsisStart, defaultEllipsisEnd, expandActionStaticLayout!!.text)
             return maybeRemoveEndingCharacters(staticLayout, span)
         } else {
-            return expandableText
+            return originalText
         }
     }
 
@@ -217,9 +217,9 @@ class ExpandableTextView @JvmOverloads constructor(
             DynamicLayout(span, span, paint, textWidth, ALIGN_NORMAL, lineSpacingMultiplier, lineSpacingExtra, false)
         }
 
-        val ctaIndex = span.indexOf(expandCtaStaticLayout!!.text.toString())
+        val ctaIndex = span.indexOf(expandActionStaticLayout!!.text.toString())
         var removingCharIndex = ctaIndex - 1
-        while (removingCharIndex >= 0 && dynamicLayout.lineCount > collapsedMaxLines) {
+        while (removingCharIndex >= 0 && dynamicLayout.lineCount > limitedMaxLines) {
             span.delete(removingCharIndex, removingCharIndex + 1)
             removingCharIndex--
         }
@@ -231,11 +231,11 @@ class ExpandableTextView @JvmOverloads constructor(
         textWidth: Int = measuredWidth - compoundPaddingStart - compoundPaddingEnd,
     ) {
         if (textWidth <= 0) return
-        val collapsedStaticLayout = getStaticLayout(collapsedMaxLines, expandableText, textWidth)
+        val collapsedStaticLayout = getStaticLayout(limitedMaxLines, originalText, textWidth)
         if (ctaChanged)
-            expandCtaStaticLayout = getStaticLayout(1, expandCtaSpannable, textWidth)
+            expandActionStaticLayout = getStaticLayout(1, expandActionSpannable, textWidth)
         collapsedDisplayedText = resolveDisplayedText(collapsedStaticLayout)
-        text = if (collapsed) collapsedDisplayedText else expandableText
+        text = if (collapsed) collapsedDisplayedText else originalText
     }
 
     private fun getStaticLayout(targetMaxLines: Int, text: CharSequence, textWidth: Int): StaticLayout {

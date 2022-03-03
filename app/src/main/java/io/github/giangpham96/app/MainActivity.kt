@@ -39,17 +39,17 @@ class MainActivity : AppCompatActivity() {
             val b = paddingSet.random()
             tvDynamic.setPadding(l, t, r, b)
         }
-        btnCollapsedMaxLines.setOnClickListener {
-            tvDynamic.collapsedMaxLines = Random.nextInt(3, 6)
+        btnLimitedMaxLines.setOnClickListener {
+            tvDynamic.limitedMaxLines = Random.nextInt(3, 6)
         }
         btnExpandCta.setOnClickListener {
             val ctaSet = setOf("Read more", "More", "Expand", "View more", "More detail?")
-            tvDynamic.expandCta = ctaSet.random()
+            tvDynamic.expandAction = ctaSet.random()
         }
         btnExpandCtaColor.setOnClickListener {
             val ctaColorSet =
                 setOf(Color.WHITE, Color.BLACK, Color.BLUE, Color.CYAN, Color.MAGENTA, Color.RED, Color.DKGRAY)
-            tvDynamic.expandCtaColor = ctaColorSet.random()
+            tvDynamic.expandActionColor = ctaColorSet.random()
         }
         btnMaxLines.setOnClickListener {
             tvDynamic.maxLines = Random.nextInt(7, 20)
@@ -62,7 +62,7 @@ class MainActivity : AppCompatActivity() {
                 getString(R.string.hebrew_text),
                 "Short text that doesn't need expand"
             )
-            tvDynamic.expandableText = textSet.random()
+            tvDynamic.originalText = textSet.random()
         }
         btnDrawable.setOnClickListener { 
             val drawableSet = setOf(
