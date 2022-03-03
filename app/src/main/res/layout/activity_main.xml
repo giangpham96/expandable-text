@@ -27,9 +27,9 @@
             android:layout_height="wrap_content"
             android:background="@color/purple_100"
             android:padding="16dp"
-            app:expandCta="More"
-            app:expandCtaColor="@color/blue_500"
-            app:expandableText="@string/long_text" />
+            app:expandAction="More"
+            app:expandActionColor="@color/blue_500"
+            app:originalText="@string/long_text" />
 
         <androidx.appcompat.widget.AppCompatTextView
             android:layout_width="match_parent"
@@ -46,8 +46,8 @@
             android:layout_height="wrap_content"
             android:background="@color/purple_100"
             android:padding="16dp"
-            app:expandCta="Read more"
-            app:expandableText="@string/hebrew_text" />
+            app:expandAction="Read more"
+            app:originalText="@string/hebrew_text" />
 
         <androidx.appcompat.widget.AppCompatTextView
             android:layout_width="match_parent"
@@ -65,8 +65,8 @@
             android:background="@color/purple_100"
             android:maxLines="5"
             android:padding="16dp"
-            app:expandCta="Read more"
-            app:expandableText="@string/long_text" />
+            app:expandAction="Read more"
+            app:originalText="@string/long_text" />
 
         <androidx.appcompat.widget.AppCompatTextView
             android:layout_width="match_parent"
@@ -87,10 +87,10 @@
             android:drawableTop="@android:drawable/ic_menu_save"
             android:drawablePadding="16dp"
             android:padding="16dp"
-            app:collapsedMaxLines="2"
-            app:expandCta="More"
-            app:expandCtaColor="@color/blue_500"
-            app:expandableText="@string/long_text" />
+            app:limitedMaxLines="2"
+            app:expandAction="More"
+            app:expandActionColor="@color/blue_500"
+            app:originalText="@string/long_text" />
 
         <androidx.appcompat.widget.AppCompatTextView
             android:layout_width="match_parent"
@@ -108,8 +108,8 @@
             android:layout_height="wrap_content"
             android:background="@color/purple_100"
             android:padding="16dp"
-            app:expandCta="More"
-            app:expandableText="@string/long_text" />
+            app:expandAction="More"
+            app:originalText="@string/long_text" />
 
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/btnText"
@@ -140,7 +140,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="16dp"
-            android:text="Change expandCtaColor"
+            android:text="Change expandActionColor"
             tools:ignore="HardcodedText" />
 
         <androidx.appcompat.widget.AppCompatButton
@@ -148,15 +148,15 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="16dp"
-            android:text="Change expandCta"
+            android:text="Change expandAction"
             tools:ignore="HardcodedText" />
 
         <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/btnCollapsedMaxLines"
+            android:id="@+id/btnLimitedMaxLines"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="16dp"
-            android:text="Change collapsedMaxLines"
+            android:text="Change limitedMaxLines"
             tools:ignore="HardcodedText" />
 
         <androidx.appcompat.widget.AppCompatButton
@@ -195,8 +195,8 @@
                 android:layout_height="wrap_content"
                 android:background="@color/purple_100"
                 android:padding="16dp"
-                app:expandCta="More"
-                app:expandableText="@string/long_text" />
+                app:expandAction="More"
+                app:originalText="@string/long_text" />
 
         </FrameLayout>
 
@@ -215,8 +215,8 @@
                 android:layout_height="wrap_content"
                 android:background="@color/purple_100"
                 android:padding="16dp"
-                app:expandCta="More"
-                app:expandableText="@string/long_text" />
+                app:expandAction="More"
+                app:originalText="@string/long_text" />
 
         </LinearLayout>
 
@@ -236,8 +236,8 @@
                 app:layout_constraintTop_toTopOf="parent"
                 android:background="@color/purple_100"
                 android:padding="16dp"
-                app:expandCta="More"
-                app:expandableText="@string/long_text" />
+                app:expandAction="More"
+                app:originalText="@string/long_text" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
