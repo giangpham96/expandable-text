@@ -48,7 +48,7 @@ dependencyResolutionManagement {
 ```groovy
 // build.gradle (module level)
 dependencies {
-    implementation 'com.github.giangpham96:ExpandableTextView:1.0.1'
+    implementation 'com.github.giangpham96:ExpandableTextView:1.0.2'
 }
 ```
 
