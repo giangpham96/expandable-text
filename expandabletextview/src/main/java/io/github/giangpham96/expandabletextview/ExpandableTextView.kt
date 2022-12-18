@@ -21,7 +21,9 @@ import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import androidx.annotation.ColorInt
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.core.content.ContextCompat
+import androidx.core.text.TextDirectionHeuristicsCompat
 import androidx.interpolator.view.animation.FastOutSlowInInterpolator
+import com.facebook.fbui.textlayoutbuilder.proxy.StaticLayoutProxy
 import kotlin.math.abs
 
 class ExpandableTextView @JvmOverloads constructor(
@@ -240,13 +242,33 @@ class ExpandableTextView @JvmOverloads constructor(
 
     private fun getStaticLayout(targetMaxLines: Int, text: CharSequence, textWidth: Int): StaticLayout {
         val maximumLineWidth = textWidth.coerceAtLeast(0)
-        return StaticLayout.Builder
-            .obtain(text, 0, text.length, paint, maximumLineWidth)
-            .setIncludePad(false)
-            .setEllipsize(END)
-            .setMaxLines(targetMaxLines)
-            .setLineSpacing(lineSpacingExtra, lineSpacingMultiplier)
-            .build()
+        val alignment = ALIGN_NORMAL
+
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            StaticLayout.Builder
+                .obtain(text, 0, text.length, paint, maximumLineWidth)
+                .setIncludePad(false)
+                .setMaxLines(targetMaxLines)
+                .setAlignment(alignment)
+                .setEllipsize(END)
+                .setLineSpacing(lineSpacingExtra, lineSpacingMultiplier)
+                .build()
+        } else {
+            StaticLayoutProxy.create(
+                text,
+                0,
+                text.length,
+                paint,
+                maximumLineWidth,
+                alignment,
+                lineSpacingMultiplier,
+                lineSpacingExtra,
+                false,
+                END,
+                maximumLineWidth,
+                targetMaxLines,
+                TextDirectionHeuristicsCompat.FIRSTSTRONG_LTR)
+        }
     }
 
 }

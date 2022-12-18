@@ -8,7 +8,7 @@ android {
 
     defaultConfig {
         applicationId = "io.github.giangpham96"
-        minSdk = 23
+        minSdk = 19
         targetSdk = 32
         versionCode = 1
         versionName = "1.0"
