@@ -8,7 +8,7 @@ android {
     compileSdk = 32
 
     defaultConfig {
-        minSdk = 23
+        minSdk = 19
         targetSdk = 32
         consumerProguardFiles("consumer-proguard-rules.pro")
     }
@@ -45,4 +45,6 @@ afterEvaluate {
 
 dependencies {
     implementation("androidx.appcompat:appcompat:1.4.1")
+
+    implementation ("com.facebook.fbui.textlayoutbuilder:staticlayout-proxy:1.6.0")
 }
