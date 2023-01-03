@@ -3,19 +3,13 @@ plugins {
     id("org.jetbrains.kotlin.android")
     `maven-publish`
 }
-
+group = "com.github.giangpham96"
 android {
-    compileSdk = 32
+    compileSdk = 33
 
     defaultConfig {
         minSdk = 19
-        targetSdk = 32
         consumerProguardFiles("consumer-proguard-rules.pro")
-    }
-    buildTypes {
-        release {
-            isMinifyEnabled = false
-        }
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
@@ -29,22 +23,7 @@ android {
     }
 }
 
-afterEvaluate {
-    publishing {
-        publications {
-            create<MavenPublication>("release") {
-                groupId = "io.github.giangpham96"
-                artifactId = "expandabletextview"
-                version = "1.0.0"
-
-                from(components.getByName("release"))
-            }
-        }
-    }
-}
-
 dependencies {
-    implementation("androidx.appcompat:appcompat:1.4.1")
-
+    implementation("androidx.appcompat:appcompat:1.5.1")
     implementation ("com.facebook.fbui.textlayoutbuilder:staticlayout-proxy:1.6.0")
 }
