@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.LocalTextStyle
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
@@ -29,6 +30,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
@@ -36,9 +38,13 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.ResolvedTextDirection.Ltr
+import androidx.compose.ui.text.style.ResolvedTextDirection.Rtl
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 
@@ -80,15 +86,16 @@ fun ExpandableText(
             displayedText = AnnotatedString(originalText)
             displayedLines = Int.MAX_VALUE
             animatableHeight.animateTo(
-                if (expand) expandedHeight else collapsedHeight,
+                if (expand || talkbackEnabled) expandedHeight else collapsedHeight,
                 animationSpec = animationSpec
             )
             internalExpand = expand
         } else {
-            animatableHeight.snapTo(if (expand) expandedHeight else collapsedHeight)
+            animatableHeight.snapTo(if (expand || talkbackEnabled) expandedHeight else collapsedHeight)
         }
-        displayedText = if (expand) AnnotatedString(originalText) else collapsedText
-        displayedLines = if (expand) Int.MAX_VALUE else limitedMaxLines
+        displayedText =
+            if (expand || talkbackEnabled) AnnotatedString(originalText) else collapsedText
+        displayedLines = if (expand || talkbackEnabled) Int.MAX_VALUE else limitedMaxLines
     }
     LaunchedEffect(
         originalText,
@@ -105,90 +112,123 @@ fun ExpandableText(
         invalidate = true
     }
 
-    ExpandableTextLayout(
-        expandAction = {
-            Text(
-                text = "… $expandAction",
-                color = color,
-                fontSize = fontSize,
-                fontStyle = fontStyle,
-                fontWeight = fontWeight,
-                fontFamily = fontFamily,
-                letterSpacing = letterSpacing,
-                textDecoration = textDecoration,
-                lineHeight = lineHeight,
-                maxLines = 1,
-                softWrap = softWrap,
-                style = style,
+    SubcomposeLayout(
+        modifier = Modifier
+            .clickable(
+                enabled = !talkbackEnabled && collapsedText.text != originalText,
+                onClick = onClick,
+                indication = indication,
+                interactionSource = interactionSource,
             )
-        },
-        expandedText = {
-            Text(
-                text = originalText,
-                color = color,
-                fontSize = fontSize,
-                fontStyle = fontStyle,
-                fontWeight = fontWeight,
-                fontFamily = fontFamily,
-                letterSpacing = letterSpacing,
-                textDecoration = textDecoration,
-                lineHeight = lineHeight,
-                softWrap = softWrap,
-                style = style,
-            )
-        },
-        collapsedText = { expandActionWidth ->
-            Text(
-                text = originalText,
-                color = color,
-                fontSize = fontSize,
-                fontStyle = fontStyle,
-                fontWeight = fontWeight,
-                fontFamily = fontFamily,
-                letterSpacing = letterSpacing,
-                textDecoration = textDecoration,
-                lineHeight = lineHeight,
-                maxLines = limitedMaxLines,
-                softWrap = softWrap,
-                style = style,
-                onTextLayout = { result ->
-                    val lastLine = result.lineCount - 1
-                    val lastCharacterIndex = result.getLineEnd(lastLine)
-                    if (lastCharacterIndex == originalText.length) {
-                        collapsedText = AnnotatedString(originalText)
-                    } else {
-                        var lastCharIndex = result.getLineEnd(lastLine, true) + 1
-                        var charRect: Rect
-                        do {
-                            lastCharIndex -= 1
-                            charRect = result.getCursorRect(lastCharIndex)
-                        } while (charRect.right > result.size.width - expandActionWidth)
-                        val cutText = originalText
-                            .substring(startIndex = 0, endIndex = lastCharIndex)
-                            .dropLastWhile { it.isWhitespace() }
-                        collapsedText = buildAnnotatedString {
-                            append(cutText)
-                            append('…')
-                            append(' ')
-                            withStyle(SpanStyle(color = expandActionColor)) {
-                                append(expandAction)
+            .then(modifier)
+    ) { cons ->
+        if (invalidate) {
+            val expandActionComposable = @Composable {
+                Text(
+                    text = "… $expandAction",
+                    color = color,
+                    fontSize = fontSize,
+                    fontStyle = fontStyle,
+                    fontWeight = fontWeight,
+                    fontFamily = fontFamily,
+                    letterSpacing = letterSpacing,
+                    textDecoration = textDecoration,
+                    lineHeight = lineHeight,
+                    maxLines = 1,
+                    softWrap = softWrap,
+                    style = style,
+                )
+            }
+            val expandActionWidth =
+                subcompose(slotId = "ExpandAction", content = expandActionComposable)
+                    .first()
+                    .measure(Constraints()).width
+            val measuredComposables = @Composable {
+                Text(
+                    text = originalText,
+                    color = color,
+                    fontSize = fontSize,
+                    fontStyle = fontStyle,
+                    fontWeight = fontWeight,
+                    fontFamily = fontFamily,
+                    letterSpacing = letterSpacing,
+                    textDecoration = textDecoration,
+                    lineHeight = lineHeight,
+                    maxLines = limitedMaxLines,
+                    softWrap = softWrap,
+                    style = style,
+                    onTextLayout = { result ->
+                        val lastLine = result.lineCount - 1
+                        val lastCharacterIndex = result.getLineEnd(lastLine)
+                        if (lastCharacterIndex == originalText.length) {
+                            collapsedText = AnnotatedString(originalText)
+                        } else {
+                            var lastCharIndex =
+                                result.getLineEnd(lineIndex = lastLine, visibleEnd = true) + 1
+                            var charRect: Rect
+                            when (result.getParagraphDirection(lastCharIndex - 1)) {
+                                Ltr -> {
+                                    do {
+                                        lastCharIndex -= 1
+                                        charRect = result.getCursorRect(lastCharIndex)
+                                    } while (charRect.right > result.size.width - expandActionWidth)
+                                }
+
+                                Rtl -> {
+                                    do {
+                                        lastCharIndex -= 1
+                                        charRect = result.getCursorRect(lastCharIndex)
+                                    } while (charRect.left < expandActionWidth)
+                                }
+                            }
+                            val cutText = originalText
+                                .substring(startIndex = 0, endIndex = lastCharIndex)
+                                .dropLastWhile { it.isWhitespace() }
+                            collapsedText = buildAnnotatedString {
+                                append(cutText)
+                                append('…')
+                                append(' ')
+                                withStyle(SpanStyle(color = expandActionColor)) {
+                                    append(expandAction)
+                                }
                             }
                         }
                     }
-                }
-            )
-        },
-        displayedText = {
+                )
+                Text(
+                    text = originalText,
+                    color = color,
+                    fontSize = fontSize,
+                    fontStyle = fontStyle,
+                    fontWeight = fontWeight,
+                    fontFamily = fontFamily,
+                    letterSpacing = letterSpacing,
+                    textDecoration = textDecoration,
+                    lineHeight = lineHeight,
+                    softWrap = softWrap,
+                    style = style,
+                )
+            }
+            val measuredTexts = subcompose(slotId = "MeasuredTexts", content = measuredComposables)
+            collapsedHeight = measuredTexts
+                .first()
+                .measure(cons).height.toFloat()
+            expandedHeight = measuredTexts
+                .last()
+                .measure(cons).height.toFloat()
+            invalidate = false
+        }
+        val composable = @Composable {
             Text(
                 text = if (expand == internalExpand) {
-                    if (expand) AnnotatedString(originalText) else collapsedText
+                    if (expand || talkbackEnabled) AnnotatedString(originalText) else collapsedText
                 } else {
                     displayedText
                 },
                 modifier = Modifier.height(
                     with(LocalDensity.current) {
                         if (expand == internalExpand) {
-                            if (expand) expandedHeight.toDp() else collapsedHeight.toDp()
+                            if (expand || talkbackEnabled) expandedHeight.toDp() else collapsedHeight.toDp()
                         } else {
                             animatableHeight.value.toDp()
                         }
@@ -205,78 +245,21 @@ fun ExpandableText(
                 softWrap = softWrap,
                 style = style,
                 maxLines = if (expand == internalExpand) {
-                    if (expand) Int.MAX_VALUE else limitedMaxLines
+                    if (expand || talkbackEnabled) Int.MAX_VALUE else limitedMaxLines
                 } else {
                     displayedLines
                 },
             )
-        },
-        invalidate = invalidate,
-        onMeasured = { measurements ->
-            collapsedHeight = measurements.collapsedHeight.toFloat()
-            expandedHeight = measurements.expandedHeight.toFloat()
-            invalidate = false
-        },
-        modifier = Modifier
-            .clickable(
-                enabled = !talkbackEnabled && collapsedText.text != originalText,
-                onClick = onClick,
-                indication = indication,
-                interactionSource = interactionSource,
-            )
-            .then(modifier)
-    )
-}
-
-@Composable
-private fun ExpandableTextLayout(
-    expandAction: @Composable () -> Unit,
-    expandedText: @Composable () -> Unit,
-    collapsedText: @Composable (Int) -> Unit,
-    displayedText: @Composable () -> Unit,
-    invalidate: Boolean,
-    onMeasured: (ExpandableTextHeightMeasurements) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    SubcomposeLayout(
-        modifier = modifier
-    ) { constraints ->
-        if (invalidate) {
-            val expandActionWidth =
-                subcompose(slotId = "ExpandAction", content = expandAction)
-                    .first()
-                    .measure(constraints).width
-            val measuredTexts = subcompose(slotId = "MeasuredTexts") {
-                collapsedText(expandActionWidth)
-                expandedText()
-            }
-            val collapsedHeight = measuredTexts
-                .first()
-                .measure(constraints).height
-            val expandedHeight = measuredTexts
-                .last()
-                .measure(constraints).height
-            onMeasured(
-                ExpandableTextHeightMeasurements(
-                    collapsedHeight = collapsedHeight,
-                    expandedHeight = expandedHeight
-                )
-            )
         }
-        val placeable = subcompose(slotId = "DisplayedText", content = displayedText)
+        val placeable = subcompose(slotId = "DisplayedText", content = composable)
             .first()
-            .measure(constraints)
+            .measure(cons)
 
         layout(placeable.width, placeable.height) {
             placeable.place(0, 0)
         }
     }
 }
-
-private data class ExpandableTextHeightMeasurements(
-    val collapsedHeight: Int,
-    val expandedHeight: Int,
-)
 
 @Composable
 internal fun Context.collectIsAccessibilityServiceEnabled(): State<Boolean> {
@@ -303,13 +286,42 @@ internal fun Context.collectIsAccessibilityServiceEnabled(): State<Boolean> {
 
 @Preview(showBackground = true, heightDp = 700, backgroundColor = 0xffffff)
 @Composable
+private fun PreviewRtl() =
+    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
+        Box {
+            var expand by remember { mutableStateOf(false) }
+            ExpandableText(
+                modifier = Modifier
+                    .background(Color.Gray)
+                    .padding(16.dp),
+                originalText = "וְאָהַבְתָּ אֵת יְיָ | אֱלֹהֶיךָ, בְּכָל-לְבָֽבְךָ, וּבְכָל-נַפְשְׁךָ" +
+                        ", וּבְכָל-מְאֹדֶֽךָ. וְהָיוּ הַדְּבָרִים הָאֵלֶּה, אֲשֶׁר | אָֽנֹכִי מְצַוְּךָ הַיּוֹם, עַל-לְבָבֶֽךָ: וְשִׁנַּנְתָּם לְבָנ" +
+                        "ֶיךָ, וְדִבַּרְתָּ בָּם בְּשִׁבְתְּךָ בְּבֵיתֶךָ, וּבְלֶכְתְּךָ בַדֶּרֶךְ וּֽבְשָׁכְבְּךָ, וּבְקוּמֶֽךָ. וּקְשַׁרְתָּם לְאוֹת" +
+                        " | עַל-יָדֶךָ, וְהָיוּ לְטֹטָפֹת בֵּין | עֵינֶֽיךָ, וּכְתַבְתָּם | עַל מְזֻזֹת בֵּיתֶךָ וּבִשְׁעָרֶֽיך:",
+                expandAction = "See more",
+                expand = expand,
+                expandActionColor = Color.Blue,
+                onClick = {
+                    expand = !expand
+                }
+            )
+        }
+    }
+
+@Preview(showBackground = true, heightDp = 700, backgroundColor = 0xffffff)
+@Composable
 private fun Preview() = Box {
     var expand by remember { mutableStateOf(false) }
     ExpandableText(
         modifier = Modifier
             .background(Color.Gray)
             .padding(16.dp),
-        originalText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras fermentum lectus vitae massa venenatis commodo. Nam quis felis commodo mauris congue pretium sit amet non magna. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Maecenas sed neque augue. Sed placerat, quam sodales congue luctus, orci ipsum viverra nisl, ac aliquet urna ipsum sed dui. Sed rutrum sollicitudin lacinia. Sed bibendum velit id nisi vulputate egestas. Nunc molestie arcu ante, vel consectetur lorem pulvinar et. Ut non mauris orci. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Morbi consectetur lobortis consequat. Sed semper vestibulum arcu ut sodales.",
+        originalText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod " +
+                "tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, " +
+                "quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo " +
+                "consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse " +
+                "cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non " +
+                "proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
         expandAction = "See more",
         expand = expand,
         expandActionColor = Color.Blue,
