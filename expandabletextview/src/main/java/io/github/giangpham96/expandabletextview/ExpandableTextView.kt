@@ -158,13 +158,13 @@ class ExpandableTextView @JvmOverloads constructor(
                     layoutParams = params
                 }
                 addListener(object : AnimatorListenerAdapter() {
-                    override fun onAnimationStart(animation: Animator?) {
+                    override fun onAnimationStart(animation: Animator) {
                         super.onAnimationStart(animation)
                         collapsed = !collapsed
                         text = originalText
                     }
 
-                    override fun onAnimationEnd(animation: Animator?) {
+                    override fun onAnimationEnd(animation: Animator) {
                         super.onAnimationEnd(animation)
                         text = if (collapsed) collapsedDisplayedText else originalText
                         val params = layoutParams
