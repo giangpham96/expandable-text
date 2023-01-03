@@ -3,7 +3,7 @@ plugins {
     id("org.jetbrains.kotlin.android")
     `maven-publish`
 }
-group = "com.github.giangpham96"
+
 android {
     compileSdk = 33
 
@@ -18,8 +18,15 @@ android {
     kotlinOptions {
         jvmTarget = "11"
     }
+}
+
+afterEvaluate {
     publishing {
-        singleVariant("release")
+        publications {
+            create<MavenPublication>("release") {
+                from(components.getByName("release"))
+            }
+        }
     }
 }
 
