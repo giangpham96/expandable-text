@@ -14,6 +14,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.LocalContentColor
 import androidx.compose.material.LocalTextStyle
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -32,6 +33,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.Paragraph
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -48,6 +50,31 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 
+/**
+ * @param originalText The text that might be truncated/collapsed if too long
+ * @param expandAction The text that is appended at the end of the collapsed text
+ * @param expand Whether the text should be expanded or not. Default to false
+ * @param onClick A click listener when user taps the text
+ * @param expandActionColor The color of [expandAction]
+ * @param limitedMaxLines The number of lines displayed when the text collapses
+ * @param modifier [Modifier] to apply to this layout node.
+ * @param color [Color] to apply to the text. If [Color.Unspecified], and [style] has no color set,
+ * this will be [LocalContentColor].
+ * @param fontSize The size of glyphs to use when painting the text. See [TextStyle.fontSize].
+ * @param fontStyle The typeface variant to use when drawing the letters (e.g., italic).
+ * See [TextStyle.fontStyle].
+ * @param fontWeight The typeface thickness to use when painting the text (e.g., [FontWeight.Bold]).
+ * @param fontFamily The font family to be used when rendering the text. See [TextStyle.fontFamily].
+ * @param letterSpacing The amount of space to add between each letter.
+ * See [TextStyle.letterSpacing].
+ * @param textDecoration The decorations to paint on the text (e.g., an underline).
+ * See [TextStyle.textDecoration].
+ * @param lineHeight Line height for the [Paragraph] in [TextUnit] unit, e.g. SP or EM.
+ * See [TextStyle.lineHeight].
+ * @param softWrap Whether the text should break at soft line breaks. If false, the glyphs in the
+ * text will be positioned as if there was unlimited horizontal space. If [softWrap] is false,
+ * @param style Style configuration for the text such as color, font, line height etc.
+ */
 @Composable
 fun ExpandableText(
     originalText: String,

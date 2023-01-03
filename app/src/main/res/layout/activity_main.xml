@@ -17,6 +17,21 @@
             android:layout_height="wrap_content"
             android:background="@color/purple_500"
             android:padding="16dp"
+            android:text="Compose"
+            android:textColor="@android:color/white"
+            android:textStyle="bold"
+            tools:ignore="HardcodedText" />
+
+        <androidx.compose.ui.platform.ComposeView
+            android:id="@+id/composeView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/purple_500"
+            android:padding="16dp"
             android:text="Latin text"
             android:textColor="@android:color/white"
             android:textStyle="bold"

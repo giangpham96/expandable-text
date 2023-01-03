@@ -6,7 +6,18 @@ import android.view.LayoutInflater
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.content.res.AppCompatResources
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.padding
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.widget.ConstraintSet
+import com.example.expandabletextview_compose.ExpandableText
 import io.github.giangpham96.app.databinding.ActivityMainBinding
 import java.util.Timer
 import java.util.TimerTask
@@ -98,6 +109,21 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }, 2000L, 5000L)
+        composeView.setContent {
+            var expand by remember { mutableStateOf(false) }
+            ExpandableText(
+                modifier = Modifier
+                    .background(colorResource(id = R.color.purple_100))
+                    .padding(16.dp),
+                originalText = stringResource(id = R.string.long_text),
+                expandAction = "See more",
+                expand = expand,
+                expandActionColor = androidx.compose.ui.graphics.Color.Blue,
+                onClick = {
+                    expand = !expand
+                }
+            )
+        }
     }
 
     override fun onDestroy() {
