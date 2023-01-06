@@ -1,10 +1,10 @@
-# ExpandableTextView [![](https://jitpack.io/v/giangpham96/ExpandableTextView.svg)](https://jitpack.io/#giangpham96/ExpandableTextView)
+# expandable-text [![](https://jitpack.io/v/giangpham96/expandable-text.svg)](https://jitpack.io/#giangpham96/expandable-text)
 
 Light-weighted, convenient implementation of expandable text view that supports expanding &
 collapsing animations for
 Android projects.
 
-## Why ExpandableTextView?
+## Why expandable-text?
 
 When the text is too long, a designer reasonably asks if it is possible to truncate the text by
 having a certain line
@@ -28,12 +28,9 @@ behaviour easily.
 **Step 1.** Add the JitPack repository to your build file
 
 ```groovy
-// build.gradle (root level)
-allprojects {
-    repositories {
-        ...
-        maven { url = uri("https://jitpack.io") }
-    }
+repositories {
+    ...
+    maven { url = uri("https://jitpack.io") }
 }
 ```
 
@@ -43,11 +40,11 @@ allprojects {
 // build.gradle (module level)
 dependencies {
     // use both view and compose variants
-    implementation 'com.github.giangpham96:ExpandableTextView:1.0.4'
+    implementation 'com.github.giangpham96:expandable-text:2.0.0'
     // use only view variant
-    implementation 'com.github.giangpham96.ExpandableTextView:expandabletextview:1.0.4'
+    implementation 'com.github.giangpham96.expandable-text:expandable_textview:2.0.0'
     // use only compose variant
-    implementation 'com.github.giangpham96.ExpandableTextView:expandabletextview-compose:1.0.4'
+    implementation 'com.github.giangpham96.expandable-text:expandable_text_compose:2.0.0'
 }
 ```
 
@@ -57,7 +54,7 @@ dependencies {
 
 ```xml
 
-<io.github.giangpham96.expandabletextview.ExpandableTextView 
+<io.github.giangpham96.expandable_textview.ExpandableTextView 
     android:layout_width="match_parent"
     android:layout_height="wrap_content" 
     android:background="@color/purple_100"
@@ -105,16 +102,17 @@ dependencies {
 ### Compose
 
 ```kotlin
+var expand by remember { mutableStateOf(false) }
+
 ExpandableText(
     originalText = "a very long text that will be truncated at some points",
     expandAction = "See more",
     expand = expand,
     expandActionColor = Color.Blue,
     limitedMaxLines = 2,
-    onClick = {},
-    indication = LocalIndication.current,
-    interactionSource = remember { MutableInteractionSource() },
     animationSpec = spring(),
+    modifier = Modifier
+        .clickable { expand = !expand },
 )
 ```
 
