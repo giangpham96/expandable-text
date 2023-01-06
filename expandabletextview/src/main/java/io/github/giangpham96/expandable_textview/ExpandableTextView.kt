@@ -1,4 +1,4 @@
-package io.github.giangpham96.expandabletextview
+package io.github.giangpham96.expandable_textview
 
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
