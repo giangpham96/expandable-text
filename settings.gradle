@@ -7,5 +7,5 @@ pluginManagement {
 }
 rootProject.name = "ExpandableTextView"
 include ':app'
-include ':expandabletextview'
-include ':expandabletextview-compose'
+include ':expandable_textview'
+include ':expandable_text_compose'

@@ -42,6 +42,6 @@ dependencies {
     val composeBom = platform("androidx.compose:compose-bom:2022.12.00")
     implementation(composeBom)
     implementation("androidx.compose.material:material")
-    implementation(project(":expandabletextview"))
-    implementation(project(":expandabletextview-compose"))
+    implementation(project(":expandable_textview"))
+    implementation(project(":expandable_text_compose"))
 }
