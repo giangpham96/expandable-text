@@ -235,11 +235,6 @@ private fun TextLayoutResult.resolveCollapsedText(
     }
 }
 
-private data class ExpandableTextHeights(
-    val collapsedHeight: Float,
-    val expandedHeight: Float,
-)
-
 @Preview(showBackground = true, heightDp = 700, backgroundColor = 0xffffff)
 @Composable
 private fun PreviewRtl() =
