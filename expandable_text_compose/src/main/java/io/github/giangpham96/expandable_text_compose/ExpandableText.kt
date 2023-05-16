@@ -43,7 +43,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Constraints
-import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.unit.LayoutDirection.Rtl as RTL
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 
@@ -118,9 +118,9 @@ fun ExpandableText(
             textMeasurer = textMeasurer,
         )
         Text(
-            text = expandableTextData.first,
+            text = expandableTextData.text,
             modifier = Modifier.height(
-                with(LocalDensity.current) { expandableTextData.third.toDp() }
+                with(LocalDensity.current) { expandableTextData.height.toDp() }
             ),
             color = color,
             fontSize = fontSize,
@@ -132,7 +132,7 @@ fun ExpandableText(
             lineHeight = lineHeight,
             softWrap = softWrap,
             style = style,
-            maxLines = expandableTextData.second,
+            maxLines = expandableTextData.lineCount,
         )
     }
 }
@@ -149,7 +149,7 @@ fun Constraints.rememberExpandableTextData(
     textStyle: TextStyle,
     animationSpec: AnimationSpec<Float>,
     textMeasurer: TextMeasurer,
-): Triple<AnnotatedString, Int, Float> {
+): ExpandableTextData {
     // internalExpand == expand means it's the first composition, thus, no animation needed
     var internalExpand by remember { mutableStateOf(expand) }
     val expandActionWidth = textMeasurer.rememberExpandActionLayoutResult(
@@ -203,7 +203,11 @@ fun Constraints.rememberExpandableTextData(
         displayedText = if (expand) AnnotatedString(originalText) else collapsedText
         displayedLines = if (expand) Int.MAX_VALUE else limitedMaxLines
     }
-    return Triple(displayedText, displayedLines, animatableHeight.value)
+    return ExpandableTextData(
+        text = displayedText,
+        lineCount = displayedLines,
+        height = animatableHeight.value
+    )
 }
 
 @Composable
@@ -306,30 +310,35 @@ private fun TextMeasurer.rememberExpandedTextLayoutResult(
     }
 }
 
+data class ExpandableTextData(
+    val text: AnnotatedString,
+    val lineCount: Int,
+    val height: Float,
+)
+
 @Preview(showBackground = true, heightDp = 700, backgroundColor = 0xffffff)
 @Composable
-private fun PreviewRtl() =
-    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-        Box {
-            var expand by remember { mutableStateOf(false) }
-            ExpandableText(
-                originalText = "וְאָהַבְתָּ אֵת יְיָ | אֱלֹהֶיךָ, בְּכָל-לְבָֽבְךָ, וּבְכָל-נַפְשְׁךָ" +
-                        ", וּבְכָל-מְאֹדֶֽךָ. וְהָיוּ הַדְּבָרִים הָאֵלֶּה, אֲשֶׁר | אָֽנֹכִי מְצַוְּךָ הַיּוֹם, עַל-לְבָבֶֽךָ: וְשִׁנַּנְתָּם לְבָנ" +
-                        "ֶיךָ, וְדִבַּרְתָּ בָּם בְּשִׁבְתְּךָ בְּבֵיתֶךָ, וּבְלֶכְתְּךָ בַדֶּרֶךְ וּֽבְשָׁכְבְּךָ, וּבְקוּמֶֽךָ. וּקְשַׁרְתָּם לְאוֹת" +
-                        " | עַל-יָדֶךָ, וְהָיוּ לְטֹטָפֹת בֵּין | עֵינֶֽיךָ, וּכְתַבְתָּם | עַל מְזֻזֹת בֵּיתֶךָ וּבִשְׁעָרֶֽיך:",
-                expandAction = "See more",
-                modifier = Modifier
-                    .clickable(
-                        indication = null,
-                        interactionSource = remember { MutableInteractionSource() }
-                    ) { expand = !expand }
-                    .background(Color.Gray)
-                    .padding(16.dp),
-                expand = expand,
-                expandActionColor = Color.Blue
-            )
-        }
+private fun PreviewRtl() = CompositionLocalProvider(LocalLayoutDirection provides RTL) {
+    Box {
+        var expand by remember { mutableStateOf(false) }
+        ExpandableText(
+            originalText = "וְאָהַבְתָּ אֵת יְיָ | אֱלֹהֶיךָ, בְּכָל-לְבָֽבְךָ, וּבְכָל-נַפְשְׁךָ" +
+                    ", וּבְכָל-מְאֹדֶֽךָ. וְהָיוּ הַדְּבָרִים הָאֵלֶּה, אֲשֶׁר | אָֽנֹכִי מְצַוְּךָ הַיּוֹם, עַל-לְבָבֶֽךָ: וְשִׁנַּנְתָּם לְבָנ" +
+                    "ֶיךָ, וְדִבַּרְתָּ בָּם בְּשִׁבְתְּךָ בְּבֵיתֶךָ, וּבְלֶכְתְּךָ בַדֶּרֶךְ וּֽבְשָׁכְבְּךָ, וּבְקוּמֶֽךָ. וּקְשַׁרְתָּם לְאוֹת" +
+                    " | עַל-יָדֶךָ, וְהָיוּ לְטֹטָפֹת בֵּין | עֵינֶֽיךָ, וּכְתַבְתָּם | עַל מְזֻזֹת בֵּיתֶךָ וּבִשְׁעָרֶֽיך:",
+            expandAction = "See more",
+            modifier = Modifier
+                .clickable(
+                    indication = null,
+                    interactionSource = remember { MutableInteractionSource() }
+                ) { expand = !expand }
+                .background(Color.Gray)
+                .padding(16.dp),
+            expand = expand,
+            expandActionColor = Color.Blue
+        )
     }
+}
 
 @Preview(showBackground = true, heightDp = 700, backgroundColor = 0xffffff)
 @Composable
