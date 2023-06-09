@@ -51,6 +51,18 @@ class ExpandableTextView @JvmOverloads constructor(
             )
             updateCollapsedDisplayedText(ctaChanged = true)
         }
+    private var lessMoreAction: String? = null
+        set(value) {
+            field = value
+            if(field == null) return
+            lessMoreActionSpannable = SpannableString(" $value")
+            lessMoreActionSpannable.setSpan(
+                ForegroundColorSpan(expandActionColor),
+                0,
+                lessMoreActionSpannable.length,
+                SPAN_EXCLUSIVE_EXCLUSIVE
+            )
+        }
     var limitedMaxLines: Int = 3
         set(value) {
             check(maxLines == -1 || value <= maxLines) {
@@ -83,6 +95,7 @@ class ExpandableTextView @JvmOverloads constructor(
     private var expandActionSpannable = SpannableString("")
     private var expandActionStaticLayout: StaticLayout? = null
     private var collapsedDisplayedText: CharSequence? = null
+    private var lessMoreActionSpannable = SpannableString("")
 
     init {
         ellipsize = END
@@ -91,6 +104,7 @@ class ExpandableTextView @JvmOverloads constructor(
         expandActionColor = a.getColor(R.styleable.ExpandableTextView_expandActionColor, expandActionColor)
         originalText = a.getString(R.styleable.ExpandableTextView_originalText) ?: originalText
         limitedMaxLines = a.getInt(R.styleable.ExpandableTextView_limitedMaxLines, limitedMaxLines)
+        lessMoreAction = a.getString(R.styleable.ExpandableTextView_lessMoreAction)
         check(maxLines == -1 || limitedMaxLines <= maxLines) {
             """
                 maxLines ($maxLines) must be greater than or equal to limitedMaxLines ($limitedMaxLines). 
@@ -143,7 +157,7 @@ class ExpandableTextView @JvmOverloads constructor(
             return
         }
         val height0 = height
-        text = if (collapsed) originalText else collapsedDisplayedText
+        text = if (collapsed) originalText.addLessMoreSpan() else collapsedDisplayedText
         measure(MeasureSpec.makeMeasureSpec(width, EXACTLY), MeasureSpec.makeMeasureSpec(height, UNSPECIFIED))
         val height1 = measuredHeight
         animator?.cancel()
@@ -166,7 +180,7 @@ class ExpandableTextView @JvmOverloads constructor(
 
                     override fun onAnimationEnd(animation: Animator) {
                         super.onAnimationEnd(animation)
-                        text = if (collapsed) collapsedDisplayedText else originalText
+                        text = if (collapsed) collapsedDisplayedText else originalText.addLessMoreSpan()
                         val params = layoutParams
                         layoutParams.height = WRAP_CONTENT
                         layoutParams = params
@@ -268,6 +282,14 @@ class ExpandableTextView @JvmOverloads constructor(
                 maximumLineWidth,
                 targetMaxLines,
                 TextDirectionHeuristicsCompat.FIRSTSTRONG_LTR)
+        }
+    }
+
+    private fun CharSequence.addLessMoreSpan(): CharSequence {
+        return when (lessMoreAction) {
+            null -> this@addLessMoreSpan
+            else -> return SpannableStringBuilder(this)
+                .append(lessMoreActionSpannable)
         }
     }
 
