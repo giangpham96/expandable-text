@@ -44,22 +44,22 @@ class ExpandableTextView @JvmOverloads constructor(
             val start = ellipsis.toString().length
             expandActionSpannable = SpannableString("$ellipsis $value")
             expandActionSpannable.setSpan(
-                ForegroundColorSpan(expandActionColor),
+                ForegroundColorSpan(actionColor),
                 start,
                 expandActionSpannable.length,
                 SPAN_EXCLUSIVE_EXCLUSIVE
             )
             updateCollapsedDisplayedText(ctaChanged = true)
         }
-    private var lessMoreAction: String? = null
+    private var collapseAction: String? = null
         set(value) {
             field = value
             if(field == null) return
-            lessMoreActionSpannable = SpannableString(" $value")
-            lessMoreActionSpannable.setSpan(
-                ForegroundColorSpan(expandActionColor),
+            collapseActionSpannable = SpannableString(" $value")
+            collapseActionSpannable.setSpan(
+                ForegroundColorSpan(actionColor),
                 0,
-                lessMoreActionSpannable.length,
+                collapseActionSpannable.length,
                 SPAN_EXCLUSIVE_EXCLUSIVE
             )
         }
@@ -76,7 +76,7 @@ class ExpandableTextView @JvmOverloads constructor(
         }
 
     @ColorInt
-    var expandActionColor: Int = ContextCompat.getColor(context, android.R.color.holo_purple)
+    var actionColor: Int = ContextCompat.getColor(context, android.R.color.holo_purple)
         set(value) {
             field = value
             val colorSpan = ForegroundColorSpan(value)
@@ -95,16 +95,16 @@ class ExpandableTextView @JvmOverloads constructor(
     private var expandActionSpannable = SpannableString("")
     private var expandActionStaticLayout: StaticLayout? = null
     private var collapsedDisplayedText: CharSequence? = null
-    private var lessMoreActionSpannable = SpannableString("")
+    private var collapseActionSpannable = SpannableString("")
 
     init {
         ellipsize = END
         val a = context.obtainStyledAttributes(attrs, R.styleable.ExpandableTextView)
         expandAction = a.getString(R.styleable.ExpandableTextView_expandAction) ?: expandAction
-        expandActionColor = a.getColor(R.styleable.ExpandableTextView_expandActionColor, expandActionColor)
+        actionColor = a.getColor(R.styleable.ExpandableTextView_actionColor, actionColor)
         originalText = a.getString(R.styleable.ExpandableTextView_originalText) ?: originalText
         limitedMaxLines = a.getInt(R.styleable.ExpandableTextView_limitedMaxLines, limitedMaxLines)
-        lessMoreAction = a.getString(R.styleable.ExpandableTextView_lessMoreAction)
+        collapseAction = a.getString(R.styleable.ExpandableTextView_collapseAction)
         check(maxLines == -1 || limitedMaxLines <= maxLines) {
             """
                 maxLines ($maxLines) must be greater than or equal to limitedMaxLines ($limitedMaxLines). 
@@ -286,10 +286,10 @@ class ExpandableTextView @JvmOverloads constructor(
     }
 
     private fun CharSequence.addLessMoreSpan(): CharSequence {
-        return when (lessMoreAction) {
+        return when (collapseAction) {
             null -> this@addLessMoreSpan
             else -> return SpannableStringBuilder(this)
-                .append(lessMoreActionSpannable)
+                .append(collapseActionSpannable)
         }
     }
 

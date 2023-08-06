@@ -4,8 +4,8 @@
         <attr name="limitedMaxLines" format="integer" />
         <attr name="originalText" format="string" />
         <attr name="expandAction" format="string" />
-        <attr name="expandActionColor" format="string" />
-        <attr name="lessMoreAction" format="string" />
+        <attr name="actionColor" format="string" />
+        <attr name="collapseAction" format="string" />
     </declare-styleable>
 
 </resources>
