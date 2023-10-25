@@ -51,7 +51,7 @@ import androidx.compose.ui.unit.dp
  * @param originalText The text that might be truncated/collapsed if too long
  * @param expandAction The text that is appended at the end of the collapsed text
  * @param expand Whether the text should be expanded or not. Default to false
- * @param expandActionColor The color of [expandAction]
+ * @param actionColor The color of [expandAction]
  * @param limitedMaxLines The number of lines displayed when the text collapses
  * @param modifier [Modifier] to apply to this layout node.
  * @param color [Color] to apply to the text. If [Color.Unspecified], and [style] has no color set,
@@ -78,7 +78,7 @@ fun ExpandableText(
     expandAction: String,
     modifier: Modifier = Modifier,
     expand: Boolean = false,
-    expandActionColor: Color = Color.Unspecified,
+    actionColor: Color = Color.Unspecified,
     limitedMaxLines: Int = 3,
     color: Color = Color.Unspecified,
     fontSize: TextUnit = TextUnit.Unspecified,
@@ -110,7 +110,7 @@ fun ExpandableText(
             originalText = originalText,
             expandAction = expandAction,
             expand = expand,
-            expandActionColor = expandActionColor,
+            actionColor = actionColor,
             limitedMaxLines = limitedMaxLines,
             softWrap = softWrap,
             textStyle = mergedStyle,
@@ -143,7 +143,7 @@ fun Constraints.rememberExpandableTextData(
     originalText: String,
     expandAction: String,
     expand: Boolean,
-    expandActionColor: Color,
+    actionColor: Color,
     limitedMaxLines: Int,
     softWrap: Boolean,
     textStyle: TextStyle,
@@ -175,7 +175,7 @@ fun Constraints.rememberExpandableTextData(
         originalText = originalText,
         expandAction = expandAction,
         expandActionWidth = expandActionWidth,
-        expandActionColor = expandActionColor,
+        actionColor = actionColor,
     )
     var displayedText by remember {
         mutableStateOf(if (expand) AnnotatedString(originalText) else collapsedText)
@@ -215,11 +215,11 @@ private fun TextLayoutResult.rememberCollapsedText(
     originalText: String,
     expandAction: String,
     expandActionWidth: Int,
-    expandActionColor: Color,
+    actionColor: Color,
 ): AnnotatedString {
     val lastLine = lineCount - 1
     val lastCharacterIndex = getLineEnd(lastLine)
-    return remember(originalText, expandAction, expandActionWidth, expandActionColor) {
+    return remember(originalText, expandAction, expandActionWidth, actionColor) {
         if (lastCharacterIndex == originalText.length) {
             AnnotatedString(originalText)
         } else {
@@ -247,7 +247,7 @@ private fun TextLayoutResult.rememberCollapsedText(
                 append(cutText)
                 append('…')
                 append(' ')
-                withStyle(SpanStyle(color = expandActionColor)) {
+                withStyle(SpanStyle(color = actionColor)) {
                     append(expandAction)
                 }
             }
@@ -335,7 +335,7 @@ private fun PreviewRtl() = CompositionLocalProvider(LocalLayoutDirection provide
                 .background(Color.Gray)
                 .padding(16.dp),
             expand = expand,
-            expandActionColor = Color.Blue
+            actionColor = Color.Blue
         )
     }
 }
@@ -360,6 +360,6 @@ private fun Preview() = Box {
             .background(Color.Gray)
             .padding(16.dp),
         expand = expand,
-        expandActionColor = Color.Blue
+        actionColor = Color.Blue
     )
 }

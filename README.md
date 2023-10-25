@@ -62,7 +62,7 @@ dependencies {
     android:maxLines="10" 
     app:expandAction="More" 
     app:limitedMaxLines="2"
-    app:expandActionColor="@color/blue_500" 
+    app:actionColor="@color/blue_500" 
     app:originalText="@string/long_text" />
 ```
 
@@ -72,7 +72,7 @@ dependencies {
 |:---------------------:|:------:|:-----------------------------------------------------------:|:-------------------------------------------------------:|
 |  app:limitedMaxLines  |  Int   |     The maximum line counts when the text is collapsed      |                            3                            |
 |   app:expandAction    | String | The action at the end of truncated text such as "View more" | "" (Nothing will be shown at the end of truncated text) |
-| app:expandActionColor | Color  |                 The color of expand action                  |                        #ffaa66cc                        |
+| app:actionColor | Color  |             The color of expand/collapse action             |                        #ffaa66cc                        |
 |   app:originalText    | String |         The text to be displayed on this text view          |                           ""                            |
 
 #### Public functions
@@ -80,7 +80,7 @@ dependencies {
 - `limitedMaxLines` public getter & setter for the maximum line counts when the text is collapsed.
 - `expandAction` public getter & setter for the action at the end of truncated text such as "View
   more".
-- `expandActionColor` public getter & setter for the color of expand action.
+- `actionColor` public getter & setter for the color of expand/collapse action.
 - `originalText` public getter & setter for the text to be displayed on this text view.
 - `collapsed` public getter to determine if the text is being collapsed
 - `expanded` public getter to determine if the text is being expanded
@@ -108,7 +108,7 @@ ExpandableText(
     originalText = "a very long text that will be truncated at some points",
     expandAction = "See more",
     expand = expand,
-    expandActionColor = Color.Blue,
+    actionColor = Color.Blue,
     limitedMaxLines = 2,
     animationSpec = spring(),
     modifier = Modifier
