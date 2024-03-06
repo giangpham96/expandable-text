@@ -5,18 +5,19 @@ plugins {
 }
 
 android {
-    compileSdk = 33
+    namespace = "io.github.giangpham96.expandable_textview"
+    compileSdk = 34
 
     defaultConfig {
         minSdk = 19
         consumerProguardFiles("consumer-proguard-rules.pro")
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = "11"
+        jvmTarget = "17"
     }
 }
 
@@ -31,6 +32,6 @@ afterEvaluate {
 }
 
 dependencies {
-    implementation("androidx.appcompat:appcompat:1.5.1")
-    implementation ("com.facebook.fbui.textlayoutbuilder:staticlayout-proxy:1.6.0")
+    implementation("androidx.appcompat:appcompat:1.6.1")
+    implementation("com.facebook.fbui.textlayoutbuilder:staticlayout-proxy:1.6.0")
 }

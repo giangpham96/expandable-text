@@ -5,24 +5,24 @@ plugins {
 }
 
 android {
-    namespace = "com.example.expandabletextview_compose"
-    compileSdk = 33
+    namespace = "io.github.giangpham96.expandable_text_compose"
+    compileSdk = 34
 
     defaultConfig {
         minSdk = 21
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = "11"
+        jvmTarget = "17"
     }
     buildFeatures {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.3.2"
+        kotlinCompilerExtensionVersion = "1.5.9"
     }
 }
 
@@ -37,7 +37,7 @@ afterEvaluate {
 }
 
 dependencies {
-    val composeBom = platform("androidx.compose:compose-bom:2022.12.00")
+    val composeBom = platform("androidx.compose:compose-bom:2024.02.01")
     implementation(composeBom)
     implementation("androidx.compose.material:material")
     implementation("androidx.compose.ui:ui-tooling-preview")
