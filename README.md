@@ -40,11 +40,11 @@ repositories {
 // build.gradle (module level)
 dependencies {
     // use both view and compose variants
-    implementation 'com.github.giangpham96:expandable-text:2.0.0'
+    implementation 'com.github.giangpham96:expandable-text:2.0.1'
     // use only view variant
-    implementation 'com.github.giangpham96.expandable-text:expandable_textview:2.0.0'
+    implementation 'com.github.giangpham96.expandable-text:expandable_textview:2.0.1'
     // use only compose variant
-    implementation 'com.github.giangpham96.expandable-text:expandable_text_compose:2.0.0'
+    implementation 'com.github.giangpham96.expandable-text:expandable_text_compose:2.0.1'
 }
 ```
 
