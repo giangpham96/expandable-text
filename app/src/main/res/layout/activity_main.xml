@@ -43,7 +43,26 @@
             android:background="@color/purple_100"
             android:padding="16dp"
             app:expandAction="More"
-            app:expandActionColor="@color/blue_500"
+            app:actionColor="@color/blue_500"
+            app:originalText="@string/long_text" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/purple_500"
+            android:padding="16dp"
+            android:text="More / Less Text"
+            android:textColor="@android:color/white"
+            android:textStyle="bold"
+            tools:ignore="HardcodedText" />
+        <io.github.giangpham96.expandable_textview.ExpandableTextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/purple_100"
+            android:padding="16dp"
+            app:expandAction="More"
+            app:actionColor="@color/blue_500"
+            app:collapseAction="Less More"
             app:originalText="@string/long_text" />
 
         <androidx.appcompat.widget.AppCompatTextView
@@ -104,7 +123,7 @@
             android:padding="16dp"
             app:limitedMaxLines="2"
             app:expandAction="More"
-            app:expandActionColor="@color/blue_500"
+            app:actionColor="@color/blue_500"
             app:originalText="@string/long_text" />
 
         <androidx.appcompat.widget.AppCompatTextView
@@ -155,7 +174,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="16dp"
-            android:text="Change expandActionColor"
+            android:text="Change actionColor"
             tools:ignore="HardcodedText" />
 
         <androidx.appcompat.widget.AppCompatButton

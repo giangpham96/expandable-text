@@ -44,12 +44,24 @@ class ExpandableTextView @JvmOverloads constructor(
             val start = ellipsis.toString().length
             expandActionSpannable = SpannableString("$ellipsis $value")
             expandActionSpannable.setSpan(
-                ForegroundColorSpan(expandActionColor),
+                ForegroundColorSpan(actionColor),
                 start,
                 expandActionSpannable.length,
                 SPAN_EXCLUSIVE_EXCLUSIVE
             )
             updateCollapsedDisplayedText(ctaChanged = true)
+        }
+    private var collapseAction: String? = null
+        set(value) {
+            field = value
+            if(field == null) return
+            collapseActionSpannable = SpannableString(" $value")
+            collapseActionSpannable.setSpan(
+                ForegroundColorSpan(actionColor),
+                0,
+                collapseActionSpannable.length,
+                SPAN_EXCLUSIVE_EXCLUSIVE
+            )
         }
     var limitedMaxLines: Int = 3
         set(value) {
@@ -64,7 +76,7 @@ class ExpandableTextView @JvmOverloads constructor(
         }
 
     @ColorInt
-    var expandActionColor: Int = ContextCompat.getColor(context, android.R.color.holo_purple)
+    var actionColor: Int = ContextCompat.getColor(context, android.R.color.holo_purple)
         set(value) {
             field = value
             val colorSpan = ForegroundColorSpan(value)
@@ -83,14 +95,16 @@ class ExpandableTextView @JvmOverloads constructor(
     private var expandActionSpannable = SpannableString("")
     private var expandActionStaticLayout: StaticLayout? = null
     private var collapsedDisplayedText: CharSequence? = null
+    private var collapseActionSpannable = SpannableString("")
 
     init {
         ellipsize = END
         val a = context.obtainStyledAttributes(attrs, R.styleable.ExpandableTextView)
         expandAction = a.getString(R.styleable.ExpandableTextView_expandAction) ?: expandAction
-        expandActionColor = a.getColor(R.styleable.ExpandableTextView_expandActionColor, expandActionColor)
+        actionColor = a.getColor(R.styleable.ExpandableTextView_actionColor, actionColor)
         originalText = a.getString(R.styleable.ExpandableTextView_originalText) ?: originalText
         limitedMaxLines = a.getInt(R.styleable.ExpandableTextView_limitedMaxLines, limitedMaxLines)
+        collapseAction = a.getString(R.styleable.ExpandableTextView_collapseAction)
         check(maxLines == -1 || limitedMaxLines <= maxLines) {
             """
                 maxLines ($maxLines) must be greater than or equal to limitedMaxLines ($limitedMaxLines). 
@@ -143,7 +157,7 @@ class ExpandableTextView @JvmOverloads constructor(
             return
         }
         val height0 = height
-        text = if (collapsed) originalText else collapsedDisplayedText
+        text = if (collapsed) originalText.addLessMoreSpan() else collapsedDisplayedText
         measure(MeasureSpec.makeMeasureSpec(width, EXACTLY), MeasureSpec.makeMeasureSpec(height, UNSPECIFIED))
         val height1 = measuredHeight
         animator?.cancel()
@@ -166,7 +180,7 @@ class ExpandableTextView @JvmOverloads constructor(
 
                     override fun onAnimationEnd(animation: Animator) {
                         super.onAnimationEnd(animation)
-                        text = if (collapsed) collapsedDisplayedText else originalText
+                        text = if (collapsed) collapsedDisplayedText else originalText.addLessMoreSpan()
                         val params = layoutParams
                         layoutParams.height = WRAP_CONTENT
                         layoutParams = params
@@ -268,6 +282,14 @@ class ExpandableTextView @JvmOverloads constructor(
                 maximumLineWidth,
                 targetMaxLines,
                 TextDirectionHeuristicsCompat.FIRSTSTRONG_LTR)
+        }
+    }
+
+    private fun CharSequence.addLessMoreSpan(): CharSequence {
+        return when (collapseAction) {
+            null -> this@addLessMoreSpan
+            else -> return SpannableStringBuilder(this)
+                .append(collapseActionSpannable)
         }
     }
 
