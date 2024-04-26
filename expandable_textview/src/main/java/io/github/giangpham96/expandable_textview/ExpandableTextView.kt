@@ -32,7 +32,7 @@ class ExpandableTextView @JvmOverloads constructor(
     defStyleAttr: Int = 0,
 ) : AppCompatTextView(context, attrs, defStyleAttr) {
 
-    var originalText: String = ""
+    var originalText: CharSequence = ""
         set(value) {
             field = value
             updateCollapsedDisplayedText(ctaChanged = false)
