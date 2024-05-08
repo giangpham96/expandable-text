@@ -61,7 +61,7 @@ class MainActivity : AppCompatActivity() {
         btnExpandCtaColor.setOnClickListener {
             val ctaColorSet =
                 setOf(Color.WHITE, Color.BLACK, Color.BLUE, Color.CYAN, Color.MAGENTA, Color.RED, Color.DKGRAY)
-            tvDynamic.expandActionColor = ctaColorSet.random()
+            tvDynamic.actionColor = ctaColorSet.random()
         }
         btnMaxLines.setOnClickListener {
             tvDynamic.maxLines = Random.nextInt(7, 20)
@@ -120,7 +120,7 @@ class MainActivity : AppCompatActivity() {
                 originalText = stringResource(id = R.string.long_text),
                 expandAction = "See more",
                 expand = expand,
-                expandActionColor = androidx.compose.ui.graphics.Color.Blue,
+                actionColor = androidx.compose.ui.graphics.Color.Blue,
             )
         }
     }

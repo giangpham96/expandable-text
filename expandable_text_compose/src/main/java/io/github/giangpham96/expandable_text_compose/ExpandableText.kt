@@ -17,6 +17,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -42,16 +43,21 @@ import androidx.compose.ui.text.style.ResolvedTextDirection.Rtl
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.LayoutDirection.Rtl as RTL
+import androidx.compose.ui.unit.LayoutDirection.Ltr as LTR
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 
 /**
  * @param originalText The text that might be truncated/collapsed if too long
  * @param expandAction The text that is appended at the end of the collapsed text
+ * @param collapseAction The text that is appended at the end of the expanded text
  * @param expand Whether the text should be expanded or not. Default to false
- * @param expandActionColor The color of [expandAction]
+ * @param actionColor The color of [expandAction] and [collapseAction]
+ * @param actionStyle The style of [expandAction] and [collapseAction]
+ * @param actionDecoration The decoration of [expandAction] and [collapseAction]
  * @param limitedMaxLines The number of lines displayed when the text collapses
  * @param modifier [Modifier] to apply to this layout node.
  * @param color [Color] to apply to the text. If [Color.Unspecified], and [style] has no color set,
@@ -77,8 +83,11 @@ fun ExpandableText(
     originalText: String,
     expandAction: String,
     modifier: Modifier = Modifier,
+    collapseAction: String? = null,
     expand: Boolean = false,
-    expandActionColor: Color = Color.Unspecified,
+    actionColor: Color = Color.Unspecified,
+    actionStyle: TextStyle = TextStyle.Default,
+    actionDecoration: TextDecoration = TextDecoration.None,
     limitedMaxLines: Int = 3,
     color: Color = Color.Unspecified,
     fontSize: TextUnit = TextUnit.Unspecified,
@@ -109,8 +118,11 @@ fun ExpandableText(
         val expandableTextData = constraints.rememberExpandableTextData(
             originalText = originalText,
             expandAction = expandAction,
+            collapseAction = collapseAction,
             expand = expand,
-            expandActionColor = expandActionColor,
+            actionColor = actionColor,
+            actionStyle = actionStyle,
+            actionDecoration = actionDecoration,
             limitedMaxLines = limitedMaxLines,
             softWrap = softWrap,
             textStyle = mergedStyle,
@@ -137,13 +149,15 @@ fun ExpandableText(
     }
 }
 
-@OptIn(ExperimentalTextApi::class)
 @Composable
 fun Constraints.rememberExpandableTextData(
     originalText: String,
     expandAction: String,
+    collapseAction: String?,
     expand: Boolean,
-    expandActionColor: Color,
+    actionColor: Color,
+    actionStyle: TextStyle,
+    actionDecoration: TextDecoration,
     limitedMaxLines: Int,
     softWrap: Boolean,
     textStyle: TextStyle,
@@ -152,6 +166,10 @@ fun Constraints.rememberExpandableTextData(
 ): ExpandableTextData {
     // internalExpand == expand means it's the first composition, thus, no animation needed
     var internalExpand by remember { mutableStateOf(expand) }
+    val actionSpanStyle = actionStyle.toSpanStyle().copy(
+        color = actionColor,
+        textDecoration = actionDecoration
+    )
     val expandActionWidth = textMeasurer.rememberExpandActionLayoutResult(
         expandAction = expandAction,
         textStyle = textStyle,
@@ -164,24 +182,44 @@ fun Constraints.rememberExpandableTextData(
         limitedMaxLines = limitedMaxLines,
         constraints = this
     )
-    val collapsedHeight = collapsedLayoutResult.size.height
-    val expandedHeight = textMeasurer.rememberExpandedTextLayoutResult(
+    val expandedLayoutResult = textMeasurer.rememberExpandedTextLayoutResult(
         originalText = originalText,
         textStyle = textStyle,
         softWrap = softWrap,
-        constraints = this
-    ).size.height
+        constraints = this,
+    )
+    val collapsedHeight = collapsedLayoutResult.size.height
+    val expandedHeight = expandedLayoutResult.size.height
     val collapsedText = collapsedLayoutResult.rememberCollapsedText(
         originalText = originalText,
         expandAction = expandAction,
         expandActionWidth = expandActionWidth,
-        expandActionColor = expandActionColor,
+        actionSpanStyle = actionSpanStyle,
     )
+
+    // Makes sure that we're not showing the show less option when the text can't even expand
+    val canShowCollapseAction = collapsedText.text != originalText
+    val expandedText = if (collapseAction != null && canShowCollapseAction) {
+        val collapseActionWidth = textMeasurer.rememberCollapseActionLayoutResult(
+            collapseAction = collapseAction,
+            textStyle = textStyle,
+            softWrap = softWrap,
+        ).size.width
+        expandedLayoutResult.rememberExpandedText(
+            originalText = originalText,
+            collapseAction = collapseAction,
+            collapseActionWidth = collapseActionWidth,
+            actionSpanStyle = actionSpanStyle,
+        )
+    } else {
+        AnnotatedString(originalText)
+    }
+
     var displayedText by remember {
-        mutableStateOf(if (expand) AnnotatedString(originalText) else collapsedText)
+        mutableStateOf(if (expand) expandedText else collapsedText)
     }
     var displayedLines by remember {
-        mutableStateOf(if (expand) Int.MAX_VALUE else limitedMaxLines)
+        mutableIntStateOf(if (expand) Int.MAX_VALUE else limitedMaxLines)
     }
     val animatableHeight = remember {
         Animatable((if (expand) expandedHeight else collapsedHeight).toFloat())
@@ -200,7 +238,7 @@ fun Constraints.rememberExpandableTextData(
                 targetValue = (if (expand) expandedHeight else collapsedHeight).toFloat(),
             )
         }
-        displayedText = if (expand) AnnotatedString(originalText) else collapsedText
+        displayedText = if (expand) expandedText else collapsedText
         displayedLines = if (expand) Int.MAX_VALUE else limitedMaxLines
     }
     return ExpandableTextData(
@@ -215,11 +253,11 @@ private fun TextLayoutResult.rememberCollapsedText(
     originalText: String,
     expandAction: String,
     expandActionWidth: Int,
-    expandActionColor: Color,
+    actionSpanStyle: SpanStyle,
 ): AnnotatedString {
     val lastLine = lineCount - 1
     val lastCharacterIndex = getLineEnd(lastLine)
-    return remember(originalText, expandAction, expandActionWidth, expandActionColor) {
+    return remember(originalText, expandAction, expandActionWidth, actionSpanStyle) {
         if (lastCharacterIndex == originalText.length) {
             AnnotatedString(originalText)
         } else {
@@ -247,7 +285,7 @@ private fun TextLayoutResult.rememberCollapsedText(
                 append(cutText)
                 append('…')
                 append(' ')
-                withStyle(SpanStyle(color = expandActionColor)) {
+                withStyle(actionSpanStyle) {
                     append(expandAction)
                 }
             }
@@ -255,7 +293,45 @@ private fun TextLayoutResult.rememberCollapsedText(
     }
 }
 
-@OptIn(ExperimentalTextApi::class)
+@Composable
+private fun TextLayoutResult.rememberExpandedText(
+    originalText: String,
+    collapseAction: String,
+    collapseActionWidth: Int,
+    actionSpanStyle: SpanStyle,
+): AnnotatedString {
+    val lastLine = lineCount - 1
+    return remember(originalText, collapseAction, collapseActionWidth, actionSpanStyle) {
+        var lastCharIndex = getLineEnd(lineIndex = lastLine, visibleEnd = true) + 1
+        var charRect: Rect
+        when (getParagraphDirection(lastCharIndex - 1)) {
+            Ltr -> {
+                do {
+                    lastCharIndex -= 1
+                    charRect = getCursorRect(lastCharIndex)
+                } while (charRect.right > (size.width - collapseActionWidth).coerceAtLeast(0))
+            }
+
+            Rtl -> {
+                do {
+                    lastCharIndex -= 1
+                    charRect = getCursorRect(lastCharIndex)
+                } while (charRect.left < collapseActionWidth.coerceAtMost(size.width))
+            }
+        }
+        val cutText = originalText
+            .substring(startIndex = 0, endIndex = lastCharIndex)
+            .dropLastWhile { it.isWhitespace() }
+        buildAnnotatedString {
+            append(cutText)
+            append(' ')
+            withStyle(actionSpanStyle) {
+                append(collapseAction)
+            }
+        }
+    }
+}
+
 @Composable
 private fun TextMeasurer.rememberExpandActionLayoutResult(
     expandAction: String,
@@ -272,7 +348,22 @@ private fun TextMeasurer.rememberExpandActionLayoutResult(
     }
 }
 
-@OptIn(ExperimentalTextApi::class)
+@Composable
+private fun TextMeasurer.rememberCollapseActionLayoutResult(
+    collapseAction: String,
+    textStyle: TextStyle,
+    softWrap: Boolean,
+): TextLayoutResult {
+    return remember(collapseAction, textStyle, softWrap) {
+        measure(
+            text = AnnotatedString(" $collapseAction"),
+            style = textStyle,
+            softWrap = softWrap,
+            maxLines = 1,
+        )
+    }
+}
+
 @Composable
 private fun TextMeasurer.rememberCollapsedTextLayoutResult(
     originalText: String,
@@ -292,7 +383,6 @@ private fun TextMeasurer.rememberCollapsedTextLayoutResult(
     }
 }
 
-@OptIn(ExperimentalTextApi::class)
 @Composable
 private fun TextMeasurer.rememberExpandedTextLayoutResult(
     originalText: String,
@@ -316,50 +406,39 @@ data class ExpandableTextData(
     val height: Float,
 )
 
-@Preview(showBackground = true, heightDp = 700, backgroundColor = 0xffffff)
-@Composable
-private fun PreviewRtl() = CompositionLocalProvider(LocalLayoutDirection provides RTL) {
-    Box {
-        var expand by remember { mutableStateOf(false) }
-        ExpandableText(
-            originalText = "וְאָהַבְתָּ אֵת יְיָ | אֱלֹהֶיךָ, בְּכָל-לְבָֽבְךָ, וּבְכָל-נַפְשְׁךָ" +
-                    ", וּבְכָל-מְאֹדֶֽךָ. וְהָיוּ הַדְּבָרִים הָאֵלֶּה, אֲשֶׁר | אָֽנֹכִי מְצַוְּךָ הַיּוֹם, עַל-לְבָבֶֽךָ: וְשִׁנַּנְתָּם לְבָנ" +
-                    "ֶיךָ, וְדִבַּרְתָּ בָּם בְּשִׁבְתְּךָ בְּבֵיתֶךָ, וּבְלֶכְתְּךָ בַדֶּרֶךְ וּֽבְשָׁכְבְּךָ, וּבְקוּמֶֽךָ. וּקְשַׁרְתָּם לְאוֹת" +
-                    " | עַל-יָדֶךָ, וְהָיוּ לְטֹטָפֹת בֵּין | עֵינֶֽיךָ, וּכְתַבְתָּם | עַל מְזֻזֹת בֵּיתֶךָ וּבִשְׁעָרֶֽיך:",
-            expandAction = "See more",
-            modifier = Modifier
-                .clickable(
-                    indication = null,
-                    interactionSource = remember { MutableInteractionSource() }
-                ) { expand = !expand }
-                .background(Color.Gray)
-                .padding(16.dp),
-            expand = expand,
-            expandActionColor = Color.Blue
-        )
-    }
-}
+data class PreviewData(
+    val text: String,
+    val expandAction: String,
+    val collapseAction: String? = null,
+    val actionColor: Color = Color.Blue,
+    val rtl: Boolean = false,
+)
 
 @Preview(showBackground = true, heightDp = 700, backgroundColor = 0xffffff)
 @Composable
-private fun Preview() = Box {
-    var expand by remember { mutableStateOf(false) }
-    ExpandableText(
-        originalText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod " +
-                "tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, " +
-                "quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo " +
-                "consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse " +
-                "cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non " +
-                "proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
-        expandAction = "See more",
-        modifier = Modifier
-            .clickable(
-                indication = null,
-                interactionSource = remember { MutableInteractionSource() }
-            ) { expand = !expand }
-            .background(Color.Gray)
-            .padding(16.dp),
-        expand = expand,
-        expandActionColor = Color.Blue
-    )
+private fun Preview(
+    @PreviewParameter(provider = ExpandableTextPreviewParameterProvider::class) data: PreviewData
+) {
+    with(data) {
+        val direction = if (rtl) RTL else LTR
+        CompositionLocalProvider(LocalLayoutDirection provides direction) {
+            Box {
+                var expand by remember { mutableStateOf(false) }
+                ExpandableText(
+                    originalText = text,
+                    expandAction = expandAction,
+                    collapseAction = collapseAction,
+                    modifier = Modifier
+                        .clickable(
+                            indication = null,
+                            interactionSource = remember { MutableInteractionSource() }
+                        ) { expand = !expand }
+                        .background(Color.Gray)
+                        .padding(16.dp),
+                    expand = expand,
+                    actionColor = actionColor,
+                )
+            }
+        }
+    }
 }
